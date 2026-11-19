@@ -1,0 +1,346 @@
+{
+  "about": "What gemini-pro-latest said, blind, of the old and the new of each sound (tools/sound/listen.mjs), 17 November 2026: what it heard, the nearest label, how convincing 1-10 as what it is meant to be, and what gives it away. `old` is the game own sound, `now` the one made again; null: not asked, or no answer. What was done with these verdicts is docs/WILD.md, Sounds made again.",
+  "sounds": {
+    "shot": {
+      "meant": "a suppressed carbine firing one round indoors",
+      "old": {
+        "heard": "A sharp crack followed by a brief scatter of debris, like a bullet striking a concrete surface.",
+        "label": "bullet impact on concrete",
+        "realism": 5,
+        "faults": [
+          "High frequencies too prominent for a suppressor",
+          "Missing mechanical bolt action sound",
+          "Reverb tail sounds like simple filtered noise"
+        ]
+      },
+      "now": {
+        "heard": "A single loud gunshot from an unsuppressed firearm.",
+        "label": "gunshot, unsuppressed",
+        "realism": 6,
+        "faults": [
+          "Lacks mechanical bolt cycling sound",
+          "Indoor reverb tail sounds like generic noise",
+          "Initial transient is too tonal"
+        ]
+      }
+    },
+    "pistolShot": {
+      "meant": "a suppressed 9 mm pistol firing one round indoors",
+      "old": {
+        "heard": "A short burst of noise that is not easily recognisable.",
+        "label": "noise burst (nothing recognisable)",
+        "realism": 6,
+        "faults": [
+          "Lacks mechanical slide action",
+          "High-frequency hiss is too sustained",
+          "Indoor reverb lacks early reflections"
+        ]
+      },
+      "now": {
+        "heard": "A single loud crack of an unsuppressed gunshot.",
+        "label": "gunshot, unsuppressed",
+        "realism": 5,
+        "faults": [
+          "lacks mechanical slide action",
+          "transient is too synthetic",
+          "reverb tail lacks room modes"
+        ]
+      }
+    },
+    "shotgunShot": {
+      "meant": "a 12-gauge shotgun firing one shell indoors, unsuppressed",
+      "old": {
+        "heard": "A short, synthetic popping sound resembling a user interface click or menu selection.",
+        "label": "user interface click",
+        "realism": 4,
+        "faults": [
+          "Lacks low-end punch",
+          "Missing indoor reverberation",
+          "No metallic mechanical transient"
+        ]
+      },
+      "now": {
+        "heard": "A bullet ricocheting off a metal surface.",
+        "label": "bullet impact or ricochet on metal",
+        "realism": 4,
+        "faults": [
+          "Lacks indoor reverberation",
+          "Missing low-end punch",
+          "No mechanical action sounds"
+        ]
+      }
+    },
+    "shotSentry": {
+      "meant": "a heavy unsuppressed rifle firing one round, heard from 15 metres in a concrete cavern",
+      "old": {
+        "heard": "A single loud gunshot is fired.",
+        "label": "gunshot, unsuppressed",
+        "realism": 5,
+        "faults": [
+          "Initial crack is pure white noise",
+          "Reverb tail sounds metallic",
+          "Lacks heavy low-end punch"
+        ]
+      },
+      "now": {
+        "heard": "A short, synthetic video game laser sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 3,
+        "faults": [
+          "Missing long cavernous reverb tail",
+          "Laser-like synthetic pitch drop",
+          "Lacks low-end explosive punch"
+        ]
+      }
+    },
+    "shotDrone": {
+      "meant": "a light machine gun on a drone firing one round, heard from 15 metres",
+      "old": {
+        "heard": "A loud and sharp bang from an unsuppressed gunshot.",
+        "label": "gunshot, unsuppressed",
+        "realism": 5,
+        "faults": [
+          "Lacks low-frequency punch",
+          "Decay is too abrupt for 15m",
+          "Initial transient sounds like white noise"
+        ]
+      },
+      "now": {
+        "heard": "A single loud gunshot from an unsuppressed firearm.",
+        "label": "gunshot, unsuppressed",
+        "realism": 4,
+        "faults": [
+          "Lacks mechanical bolt sound",
+          "Blast is too noisy and static-like",
+          "Missing environmental reflections"
+        ]
+      }
+    },
+    "dry": {
+      "meant": "the dry click of a firing pin falling on an empty chamber",
+      "old": {
+        "heard": "A small metallic object, like a spent shell casing, dropping and bouncing on a hard floor.",
+        "label": "shell casing on a hard floor",
+        "realism": 6,
+        "faults": [
+          "Lacks metallic spring resonance",
+          "Transient attack is too soft",
+          "Decay tail is too long"
+        ]
+      },
+      "now": {
+        "heard": "I heard a short, sharp click like a button being pressed on a user interface.",
+        "label": "user interface click",
+        "realism": 6,
+        "faults": [
+          "Lacks metallic spring resonance",
+          "Transient lacks high-frequency snap",
+          "Low-mid frequencies are too prominent"
+        ]
+      }
+    },
+    "reloadIn": {
+      "meant": "a rifle magazine being pushed home into its well",
+      "old": {
+        "heard": "A short synthetic beep like a video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Lacks metallic resonance",
+          "Insertion scrape sounds like plain white noise",
+          "Missing solid low-end thud of seating"
+        ]
+      },
+      "now": {
+        "heard": "I heard a brief burst of static noise that was too short to identify.",
+        "label": "noise burst (nothing recognisable)",
+        "realism": 5,
+        "faults": [
+          "Lacks metallic friction before insertion",
+          "Final click sounds too tonal",
+          "Missing low-frequency body resonance"
+        ]
+      }
+    },
+    "boltRack": {
+      "meant": "a rifle's charging handle pulled back and let go",
+      "old": {
+        "heard": "A loud, sharp bang that sounds like an unsuppressed gunshot.",
+        "label": "gunshot, unsuppressed",
+        "realism": 5,
+        "faults": [
+          "Impacts lack mechanical weight",
+          "Metallic ring is too tonal",
+          "Sliding friction sounds like white noise"
+        ]
+      },
+      "now": {
+        "heard": "A short synthetic beep.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Lacks metallic resonance",
+          "Final impact lacks weight",
+          "Sliding friction sounds like generic noise"
+        ]
+      }
+    },
+    "shotgunPump": {
+      "meant": "a pump-action shotgun being racked",
+      "old": {
+        "heard": "A short sharp click resembling a user interface button press.",
+        "label": "user interface click",
+        "realism": 3,
+        "faults": [
+          "Lacks metallic resonance",
+          "Missing low-frequency weight",
+          "Envelopes are too short and simple"
+        ]
+      },
+      "now": {
+        "heard": "I heard a sharp metallic click resembling a gun's bolt or magazine being handled.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 5,
+        "faults": [
+          "Lacks metallic resonance",
+          "Missing low-frequency mechanical thud",
+          "Noise bursts sound too uniform"
+        ]
+      }
+    },
+    "weaponSwap": {
+      "meant": "a soldier changing from one gun to another: cloth, sling and metal handling",
+      "old": {
+        "heard": "I heard a short, sharp click resembling a user interface interaction.",
+        "label": "user interface click",
+        "realism": 6,
+        "faults": [
+          "Metal clicks lack metallic resonance",
+          "Cloth rustle sounds like static noise",
+          "Missing low-frequency handling weight"
+        ]
+      },
+      "now": {
+        "heard": "The sound of a gun's pump action or bolt being racked.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 6,
+        "faults": [
+          "Metallic clicks lack complex resonance",
+          "Cloth rustle sounds like uniform white noise",
+          "Lacks continuous sling friction between clicks"
+        ]
+      }
+    },
+    "hitMetal": {
+      "meant": "a bullet striking a steel plate",
+      "old": {
+        "heard": "A short, high-pitched synthetic beep.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 6,
+        "faults": [
+          "Lacks distinct metallic ringing",
+          "Initial impact is too noisy and broadband",
+          "Missing low-frequency plate resonance"
+        ]
+      },
+      "now": {
+        "heard": "A sharp metallic click and clack, like a gun magazine being inserted or a bolt being racked.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 6,
+        "faults": [
+          "Impact transient lacks broadband punch",
+          "Metallic ring is too simple and clean",
+          "Missing low-frequency kinetic thud"
+        ]
+      }
+    },
+    "lampBreak": {
+      "meant": "a glass lamp shot out: glass breaking",
+      "old": {
+        "heard": "A rapid series of high-pitched synthetic beeps.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Lacks distinct tonal ringing of falling shards",
+          "Initial impact lacks sharp high-frequency transient",
+          "Decay sounds like a uniform noise burst rather than discrete pieces"
+        ]
+      },
+      "now": {
+        "heard": "A short synthetic beep like one from a video game.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Lacks scattering glass shard tail",
+          "Initial impact sounds like a synthetic ping",
+          "Missing low-mid body for the lamp"
+        ]
+      }
+    },
+    "knifeHit": {
+      "meant": "a combat knife driven into a machine's metal casing",
+      "old": {
+        "heard": "I heard a very short, high-pitched synthetic beep.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Impact sounds like generic noise",
+          "Lacks blade piercing friction",
+          "Decay lacks metallic ringing"
+        ]
+      },
+      "now": {
+        "heard": "A short sharp click resembling a user interface interaction.",
+        "label": "user interface click",
+        "realism": 3,
+        "faults": [
+          "Lacks heavy low-frequency impact",
+          "Missing blade piercing friction",
+          "Resonance is too high-pitched and thin"
+        ]
+      }
+    },
+    "casing": {
+      "meant": "a brass cartridge case landing and skittering on a concrete floor",
+      "old": null,
+      "now": {
+        "heard": "I heard a rapid series of high-pitched synthetic beeps, similar to a retro video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Lacks hollow brass resonance",
+          "Missing concrete surface texture",
+          "Impacts sound too uniform"
+        ]
+      }
+    },
+    "whiz": {
+      "meant": "a bullet passing close by the listener's head",
+      "old": null,
+      "now": {
+        "heard": "A short, sharp click resembling a user interface interaction.",
+        "label": "user interface click",
+        "realism": 5,
+        "faults": [
+          "Lacks a sharp initial crack",
+          "Doppler shift sounds too tonal",
+          "Missing turbulent air displacement"
+        ]
+      }
+    },
+    "ricochet": {
+      "meant": "a bullet ricocheting off metal with a whine",
+      "old": null,
+      "now": {
+        "heard": "I hear the metallic click-clack of a gun mechanism being operated, such as a pump or a bolt.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 5,
+        "faults": [
+          "Whine is too clean and tonal",
+          "Impact lacks metallic resonance",
+          "Pitch drop is too linear"
+        ]
+      }
+    }
+  }
+}

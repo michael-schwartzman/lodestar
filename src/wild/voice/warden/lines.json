@@ -1,0 +1,282 @@
+{
+  "alarm-0": {
+    "text": "There you are.",
+    "heard": "There you are.",
+    "said": true,
+    "voice": "Clear, gentle, and calm male voice",
+    "seconds": 1.2,
+    "bytes": 7548
+  },
+  "alarm-1": {
+    "text": "Again. I have nothing but time, and you have none.",
+    "heard": "Again, I have nothing but time, and you have none.",
+    "said": true,
+    "voice": "Deep, menacing male voice, clear studio quality",
+    "seconds": 4.03,
+    "bytes": 24632
+  },
+  "found-0": {
+    "text": "One of mine is lying where you left it. I count them.",
+    "heard": "One of mine is lying where you left it. I count them.",
+    "said": true,
+    "voice": "Deep, stern male voice with clear resonance",
+    "seconds": 3.68,
+    "bytes": 22438
+  },
+  "lamp-0": {
+    "text": "I do not need the light. You do.",
+    "heard": "I do not need the light. You do.",
+    "said": true,
+    "voice": "Deep, slow, authoritative male voice with reverberation",
+    "seconds": 4.06,
+    "bytes": 24789
+  },
+  "tripwire-0": {
+    "text": "A thread across a door, and you walked through it.",
+    "heard": "A thread across a door and you walked through it.",
+    "said": true,
+    "voice": "Deep, clear male voice speaking calmly and deliberately",
+    "seconds": 3.4,
+    "bytes": 20871
+  },
+  "tripwire-1": {
+    "text": "You do not look where you step.",
+    "heard": "You do not look where you step.",
+    "said": true,
+    "voice": "very deep, resonant, slow, and stern male",
+    "seconds": 2.6,
+    "bytes": 16012
+  },
+  "response-0": {
+    "text": "You are heard. More of me is walking to you.",
+    "heard": "You are heard. More of me is walking to you.",
+    "said": true,
+    "voice": "Deep, slow, resonant male voice with low pitch",
+    "seconds": 4.01,
+    "bytes": 24476
+  },
+  "response-1": {
+    "text": "Everything you finish, I answer.",
+    "heard": "Everything you finish, I answer.",
+    "said": true,
+    "voice": "Deep robotic male voice with slight reverb",
+    "seconds": 3.19,
+    "bytes": 19617
+  },
+  "response-2": {
+    "text": "I have more doors than you have counted.",
+    "heard": "I have more doors than you have counted.",
+    "said": true,
+    "voice": "Deep, booming male voice with ominous delivery",
+    "seconds": 3.44,
+    "bytes": 21027
+  },
+  "visor-0": {
+    "text": "You cracked its face. It is still looking at you.",
+    "heard": "You cracked its face, it is still looking at you.",
+    "said": true,
+    "voice": "Deep, menacing distorted male voice, dramatic delivery.",
+    "seconds": 3.77,
+    "bytes": 23065
+  },
+  "reflex-0": {
+    "text": "You are quick. I am many.",
+    "heard": "You are quick. I am many.",
+    "said": true,
+    "voice": "Deep, raspy, menacing creature voice.",
+    "seconds": 3.17,
+    "bytes": 19460
+  },
+  "turned-0": {
+    "text": "That one is mine. Give it back.",
+    "heard": "That one is mine! Give it back!",
+    "said": true,
+    "voice": "Deep, theatrical cartoon villain with slight echo",
+    "seconds": 2.94,
+    "bytes": 18050
+  },
+  "turned-1": {
+    "text": "You are wearing my hands.",
+    "heard": "You are wearing my hands.",
+    "said": true,
+    "voice": "A clear, calm male voice speaks deliberately.",
+    "seconds": 1.83,
+    "bytes": 11310
+  },
+  "turned-2": {
+    "text": "Take them, then. I will make more.",
+    "heard": "Take them then. I will make more.",
+    "said": true,
+    "voice": "Calm, deep male voice, clear audio",
+    "seconds": 2.51,
+    "bytes": 15542
+  },
+  "burnout-0": {
+    "text": "It is quiet now. You did that to it.",
+    "heard": "It is quiet now. You did that to it.",
+    "said": true,
+    "voice": "Deep, heavily processed, robotic and menacing delivery.",
+    "seconds": 3.58,
+    "bytes": 21968
+  },
+  "witnessed-0": {
+    "text": "I watched you do that. So did they.",
+    "heard": "I watched you do that. So did they.",
+    "said": true,
+    "voice": "Deep, firm male voice with calm delivery.",
+    "seconds": 3.01,
+    "bytes": 18520
+  },
+  "pilot-0": {
+    "text": "I can feel you in the air.",
+    "heard": "I can feel you in the air.",
+    "said": true,
+    "voice": "deep male voice with dramatic, ominous delivery",
+    "seconds": 1.94,
+    "bytes": 12094
+  },
+  "pilot-1": {
+    "text": "That is my eye you are looking through.",
+    "heard": "That is my eye you are looking through.",
+    "said": true,
+    "voice": "Deep, ominous robotic male voice with distortion.",
+    "seconds": 3.07,
+    "bytes": 18833
+  },
+  "blown-0": {
+    "text": "That was my eye.",
+    "heard": "That was my eye!",
+    "said": true,
+    "voice": "pained dramatic male voice with slight distortion",
+    "seconds": 1.65,
+    "bytes": 10370
+  },
+  "unlinked-0": {
+    "text": "It has let go of you.",
+    "heard": "It has let go of you.",
+    "said": true,
+    "voice": "Deep, gravelly male voice, calm yet ominous",
+    "seconds": 1.83,
+    "bytes": 11467
+  },
+  "lodestone-0": {
+    "text": "Magnets, in a hall of rotors. You are not careful people.",
+    "heard": "Magnets in a hall of rotors? You are not careful people.",
+    "said": true,
+    "voice": "Deep, booming, incredulous male voice with slight reverb.",
+    "seconds": 5.45,
+    "bytes": 33096
+  },
+  "knocked-0": {
+    "text": "Get up. I was not speaking to you.",
+    "heard": "Get up. I was not speaking to you.",
+    "said": true,
+    "voice": "Deep, raspy male voice, commanding and dramatic.",
+    "seconds": 2.85,
+    "bytes": 17423
+  },
+  "charge-0": {
+    "text": "I felt that go on. I am sending more of me.",
+    "heard": "I felt that. Go on. I am sending more of me.",
+    "said": true,
+    "voice": "Deep, heavily processed male voice speaking slowly",
+    "seconds": 4.15,
+    "bytes": 25259
+  },
+  "charge-1": {
+    "text": "Another. You mean to bury me before you bury me.",
+    "heard": "Another. You mean to bury me before you bury me.",
+    "said": true,
+    "voice": "Deep, theatrical male voice, clear audio",
+    "seconds": 4.07,
+    "bytes": 24789
+  },
+  "few-0": {
+    "text": "There is not much of me left on this floor.",
+    "heard": "There is not much of me left on this floor.",
+    "said": true,
+    "voice": "Deep male voice speaking clearly and deliberately",
+    "seconds": 2.84,
+    "bytes": 17423
+  },
+  "hurt-0": {
+    "text": "You are leaking.",
+    "heard": "You are leaking.",
+    "said": true,
+    "voice": "Deep, digitally distorted, slow, and robotic",
+    "seconds": 1.9,
+    "bytes": 11780
+  },
+  "beacon-0": {
+    "text": "I know what that calls. I cannot run. Can you?",
+    "heard": "I know what that calls, I cannot run. Can you?",
+    "said": true,
+    "voice": "Deep, dry male voice, casual and steady.",
+    "seconds": 2.99,
+    "bytes": 18363
+  },
+  "aftershock-0": {
+    "text": "Do you feel that? The mountain is letting go.",
+    "heard": "Do you feel that? The mountain is letting go.",
+    "said": true,
+    "voice": "Deep gravelly male voice, theatrical and atmospheric.",
+    "seconds": 3.53,
+    "bytes": 21654
+  },
+  "overspeed-begin-0": {
+    "text": "Do not touch the drives.",
+    "heard": "Do not touch the drives.",
+    "said": true,
+    "voice": "Deep, robotic male voice spoken with stern authority",
+    "seconds": 2.16,
+    "bytes": 13347
+  },
+  "overspeed-1-0": {
+    "text": "Eleven hundred turns a second. They were not built for it.",
+    "heard": "Eleven hundred turns a second. They were not built for it.",
+    "said": true,
+    "voice": "Deep robotic male voice, low and resonant",
+    "seconds": 3.72,
+    "bytes": 22752
+  },
+  "overspeed-2-0": {
+    "text": "Stop. The rotors are walking out of their bearings.",
+    "heard": "Stop! The rotors are walking out of their bearings!",
+    "said": true,
+    "voice": "Urgent, authoritative deep male voice",
+    "seconds": 3.31,
+    "bytes": 20244
+  },
+  "overspeed-dark-0": {
+    "text": "You have taken my lights with them.",
+    "heard": "You have taken my lights with them.",
+    "said": true,
+    "voice": "deep, ominous, resonant and digitally processed male voice",
+    "seconds": 3.05,
+    "bytes": 18676
+  },
+  "overspeed-3-0": {
+    "text": "Please.",
+    "heard": "Please",
+    "said": true,
+    "voice": "A soft, desperate, pleading male whisper.",
+    "seconds": 1.19,
+    "bytes": 7548
+  },
+  "overspeed-done-0": {
+    "text": "Nine years.",
+    "heard": "Nine years",
+    "said": true,
+    "voice": "Deep, raspy male whisper, slow and breathy",
+    "seconds": 3.74,
+    "bytes": 22908
+  },
+  "overspeed-lost-0": {
+    "text": "You let go. Good.",
+    "heard": "You let go. Good.",
+    "said": true,
+    "voice": "Deep, gravelly male voice spoken softly",
+    "seconds": 2.28,
+    "bytes": 14131
+  }
+}

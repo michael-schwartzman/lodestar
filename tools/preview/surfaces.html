@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lodestar — surfaces</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #05080b;
+        color: #9fb3ad;
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+      #labels {
+        pointer-events: none;
+      }
+      p {
+        position: fixed;
+        left: 12px;
+        top: 4px;
+        margin: 0;
+        z-index: 2;
+        text-shadow: 0 1px 2px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gl"></canvas>
+    <canvas id="labels"></canvas>
+    <p id="info"></p>
+    <script type="module">
+      // A check page for src/gfx/textures.js and src/gfx/sky.js — see docs/DESIGN.md 8.4.
+      //   ?show=sheet                    every texture as a labelled swatch (the default)
+      //   ?show=<name>                   one texture, tiled 6x6, on a ground plane or a wall
+      //   ?show=sky&yaw=&pitch=&night=   the sky alone, looking the given way
+      import * as THREE from 'three';
+      import { lit, glow, shared } from '/src/gfx/materials.js';
+      import { makeTextures, TEXTURE_NAMES } from '/src/gfx/textures.js';
+      import { createSky } from '/src/gfx/sky.js';
+
+      const q = new URLSearchParams(location.search);
+      const show = q.get('show') || 'sheet';
+
+      const glCanvas = document.getElementById('gl');
+      const labelCanvas = document.getElementById('labels');
+      const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true });
+      const labelCtx = labelCanvas.getContext('2d');
+      const info = document.getElementById('info');
+
+      // Textures that are not plain opaque albedo maps need a different preview material.
+      const ADDITIVE = new Set(['flare', 'spark', 'ring']);
+      const ALPHA_BLEND = new Set(['puff', 'scorch', 'hole', 'blob']);
+      const ALPHA_TEST = new Set(['fence']);
+      // Shown upright, as a wall would see them, rather than flat as ground.
+      const WALL_LIKE = new Set(['wallPanel', 'hallWall', 'concrete', 'rock', 'fence', 'door']);
+
+      function materialFor(name, map) {
+        if (ADDITIVE.has(name)) return glow({ map, additive: true });
+        if (ALPHA_BLEND.has(name)) return lit({ baked: true, map, transparent: true });
+        if (ALPHA_TEST.has(name)) return lit({ baked: true, map, alphaTest: true });
+        return lit({ baked: true, map });
+      }
+
+      /** Every vertex gets the same flat colour, so a `lit({ baked: true })` plane reads as an unlit swatch. */
+      function flatColor(geometry, v) {
+        const n = geometry.attributes.position.count;
+        const arr = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++) arr.set(v, i * 3);
+        geometry.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+        return geometry;
+      }
+
+      // lit()/glow() read `uv` straight off the geometry (see materials.js) — there is no texture-matrix
+      // support for repeat/offset the way three's built-in materials have, so "tiled NxN" has to be baked
+      // into the UV attribute itself, exactly like the game builds its own UVs from world metres.
+      function scaleUV(geometry, su, sv) {
+        const uv = geometry.attributes.uv;
+        const arr = uv.array;
+        for (let i = 0; i < arr.length; i += 2) {
+          arr[i] *= su;
+          arr[i + 1] *= sv;
+        }
+        uv.needsUpdate = true;
+        return geometry;
+      }
+
+      function timeMakeTextures(size) {
+        const t0 = performance.now();
+        const set = makeTextures({ size });
+        const ms = performance.now() - t0;
+        for (const k in set) set[k].dispose();
+        return ms;
+      }
+
+      function averageLuminance(canvas) {
+        const ctx = canvas.getContext('2d');
+        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let sum = 0;
+        let wsum = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const a = data[i + 3] / 255;
+          const l = (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]) / 255;
+          sum += l * a;
+          wsum += a;
+        }
+        return wsum > 0 ? sum / wsum : 0;
+      }
+
+      // Generate once; used by every mode below, and always timed/measured per the design notes.
+      const ms512 = (() => {
+        const t0 = performance.now();
+        window.__texturesAt512 = makeTextures({ size: 512 });
+        return performance.now() - t0;
+      })();
+      const ms256 = timeMakeTextures(256);
+      const textures = window.__texturesAt512;
+      const luminance = {};
+      for (const name of TEXTURE_NAMES) luminance[name] = averageLuminance(textures[name].image);
+      window.__surfaces = { ms512, ms256, names: TEXTURE_NAMES.slice(), luminance };
+
+      function resize(camera) {
+        const w = glCanvas.clientWidth || window.innerWidth;
+        const h = glCanvas.clientHeight || window.innerHeight;
+        if (glCanvas.width !== w || glCanvas.height !== h) {
+          renderer.setSize(w, h, false);
+          labelCanvas.width = w;
+          labelCanvas.height = h;
+          if (camera.isPerspectiveCamera) {
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+          }
+        }
+        return [w, h];
+      }
+
+      let frames = 0;
+      function finishAfter(n, draw) {
+        function frame(ms) {
+          draw(ms / 1000);
+          if (++frames >= n) {
+            window.__ready = true;
+            return;
+          }
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      // ------------------------------------------------------------------------------------
+      if (show === 'sheet') {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x808080);
+        const cols = 7;
+        const rows = Math.ceil(TEXTURE_NAMES.length / cols);
+        const cell = 2;
+        const gap = 0.55;
+        const totalW = cols * cell + (cols - 1) * gap;
+        const totalH = rows * cell + (rows - 1) * gap;
+        const padL = 1;
+        const padR = 1;
+        const padT = 1.2;
+        const padB = 1.6;
+        const camera = new THREE.OrthographicCamera(
+          -totalW / 2 - padL,
+          totalW / 2 + padR,
+          totalH / 2 + padT,
+          -totalH / 2 - padB,
+          0.1,
+          20,
+        );
+        camera.position.set(0, 0, 10);
+        camera.lookAt(0, 0, 0);
+
+        const cellPos = [];
+        TEXTURE_NAMES.forEach((name, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = -totalW / 2 + col * (cell + gap) + cell / 2;
+          const y = totalH / 2 - row * (cell + gap) - cell / 2;
+          cellPos.push([name, x, y]);
+          const tex = textures[name];
+          const tiling = tex.userData.metres != null;
+          const geo = flatColor(new THREE.PlaneGeometry(cell, cell), [0.9, 0.9, 0.9]);
+          scaleUV(geo, tiling ? 3 : 1, tiling ? 3 : 1);
+          const mesh = new THREE.Mesh(geo, materialFor(name, tex));
+          mesh.position.set(x, y, 0);
+          scene.add(mesh);
+        });
+
+        function worldToScreen(wx, wy, w, h) {
+          const nx = (wx - camera.left) / (camera.right - camera.left);
+          const ny = (wy - camera.bottom) / (camera.top - camera.bottom);
+          return [nx * w, (1 - ny) * h];
+        }
+
+        function draw() {
+          const [w, h] = resize(camera);
+          renderer.render(scene, camera);
+          labelCtx.clearRect(0, 0, w, h);
+          labelCtx.font = '11px ui-monospace, Menlo, Consolas, monospace';
+          labelCtx.textAlign = 'center';
+          for (const [name, x, y] of cellPos) {
+            const [sx, syTop] = worldToScreen(x, y + cell / 2, w, h);
+            const [, syBot] = worldToScreen(x, y - cell / 2, w, h);
+            labelCtx.fillStyle = '#eaf4f1';
+            labelCtx.fillText(name, sx, syTop - 6);
+            const m = textures[name].userData.metres;
+            labelCtx.fillStyle = '#b8c9c4';
+            labelCtx.fillText(
+              m != null ? `${m} m · L ${luminance[name].toFixed(2)}` : `L ${luminance[name].toFixed(2)}`,
+              sx,
+              syBot + 14,
+            );
+          }
+        }
+        info.textContent = `size 512: ${ms512.toFixed(1)} ms · size 256: ${ms256.toFixed(1)} ms · mid-grey background shows alpha`;
+        finishAfter(3, draw);
+      } else if (show === 'sky') {
+        const scene = new THREE.Scene();
+        const sky = createSky();
+        scene.add(sky.mesh);
+        const camera = new THREE.PerspectiveCamera(74, 1, 0.05, 400);
+        const yaw = (Number(q.get('yaw')) || 0) * (Math.PI / 180);
+        const pitch = (Number(q.get('pitch')) || 0) * (Math.PI / 180);
+        camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+        if (q.get('night') === '1') shared.uNight.value = 1;
+        info.textContent = `sky · yaw ${(yaw * (180 / Math.PI)).toFixed(0)} · pitch ${(pitch * (180 / Math.PI)).toFixed(0)}${
+          q.get('night') === '1' ? ' · night vision' : ''
+        }`;
+        finishAfter(6, (t) => {
+          resize(camera);
+          sky.update(camera, t);
+          renderer.render(scene, camera);
+        });
+      } else {
+        const name = show;
+        const tex = textures[name];
+        if (!tex) throw new Error(`unknown texture: ${name}`);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x11161c);
+        const tiling = tex.userData.metres != null;
+        const metres = tex.userData.metres ?? 1;
+        const wall = WALL_LIKE.has(name);
+        let geo;
+        let camera;
+        if (tiling) {
+          const span = metres * 6;
+          // wallPanel/hallWall clamp vertically, so a 6x "repeat" would mostly show dead clamped colour —
+          // use a shorter, still-tall span so the clamp-to-plain transition is actually visible.
+          const vrepeat = wall ? (name === 'wallPanel' || name === 'hallWall' ? 2 : 6) : 6;
+          geo = wall ? new THREE.PlaneGeometry(span, span) : new THREE.PlaneGeometry(span, span).rotateX(-Math.PI / 2);
+          flatColor(geo, [0.9, 0.9, 0.9]);
+          scaleUV(geo, 6, vrepeat);
+          camera = new THREE.PerspectiveCamera(60, 1, 0.1, 400);
+          if (wall) {
+            camera.position.set(span * 0.3, span * 0.4, span * 1.0);
+            camera.lookAt(0, -span * 0.05, 0);
+          } else {
+            camera.position.set(0, metres * 1.6, span * 0.46);
+            camera.lookAt(0, 0, -span * 0.25);
+          }
+        } else {
+          // a single image: shown roughly actual size, face-on, no tiling
+          const w = name === 'door' ? 1 : 1.2;
+          const h = name === 'door' ? 2.4 : 1.2 * (tex.image.height / tex.image.width);
+          geo = new THREE.PlaneGeometry(w, h);
+          flatColor(geo, [0.9, 0.9, 0.9]);
+          camera = new THREE.PerspectiveCamera(50, 1, 0.1, 50);
+          camera.position.set(w * 0.45, h * 0.2, w * 2.1);
+          camera.lookAt(0, 0, 0);
+        }
+        const mesh = new THREE.Mesh(geo, materialFor(name, tex));
+        scene.add(mesh);
+        info.textContent = `${name} · ${tiling ? `${metres} m/repeat, tiled 6x6` : 'single image'}`;
+        finishAfter(3, () => {
+          resize(camera);
+          renderer.render(scene, camera);
+        });
+      }
+    </script>
+  </body>
+</html>

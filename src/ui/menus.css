@@ -1,0 +1,848 @@
+/* Lodestar — every menu screen. Cold, quiet, precise: thin mint rules, condensed tracked type, mono numbers.
+   Nothing here is brighter than ui.css's palette; the only filled element on any screen is its primary button. */
+
+#menus {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+  font-family: var(--font-head);
+  color: var(--bone);
+  z-index: 20;
+  --pad: 28px;
+  --gap: 14px;
+}
+
+#menus[data-screen] {
+  display: block;
+  pointer-events: auto;
+}
+
+#menus * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* short phones (landscape, held sideways): tighten the rhythm so the primary button needs no scroll */
+@media (max-height: 460px) {
+  #menus {
+    --pad: 16px;
+    --gap: 8px;
+  }
+}
+
+@media (max-height: 360px) {
+  #menus {
+    --pad: 10px;
+    --gap: 6px;
+  }
+}
+
+/* ---------- shared type ---------- */
+
+.m-eyebrow {
+  font: 11px/1 var(--font-data);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+  margin: 0 0 0.6em;
+}
+
+.m-heading {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.5em;
+  line-height: 1.05;
+  color: var(--bone);
+}
+
+.m-rule {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: var(--gap) 0;
+}
+
+.m-sub {
+  font: 12px/1.5 var(--font-data);
+  color: var(--mute);
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--gap);
+}
+
+/* ---------- buttons: the primary is the only filled thing on a screen ---------- */
+
+.m-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--bone);
+  font: 13px/1 var(--font-head);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  min-height: 44px;
+  padding: 0 1.2em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  cursor: pointer;
+  text-align: center;
+}
+
+.m-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--mint);
+}
+
+.m-btn.is-focus {
+  outline: none;
+  border-color: var(--mint);
+  box-shadow: 0 0 0 1px var(--mint);
+}
+
+.m-btn--primary {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.m-btn--primary:hover {
+  background: var(--bone);
+  border-color: var(--bone);
+}
+
+.m-btn--primary.is-focus {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 0 0 4px var(--mint);
+}
+
+.m-btn--block {
+  width: 100%;
+}
+
+.m-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.m-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- panel: the card every screen but `title` sits in ---------- */
+
+.m-scrim {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* #menus itself can't pad an absolutely positioned child's containing block (padding only
+     constrains normal-flow layout), so the safe-area clearance is added directly here instead */
+  padding: calc(var(--pad) + var(--sat)) calc(var(--pad) + var(--sar)) calc(var(--pad) + var(--sab))
+    calc(var(--pad) + var(--sal));
+  background: rgba(5, 8, 11, 0.62);
+}
+
+.m-panel {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.m-panel--wide {
+  width: min(760px, 100%);
+}
+
+/* restrained tactical corner brackets: two opposite corners read as "terminal", not a rounded app card */
+.m-panel::before,
+.m-panel::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  pointer-events: none;
+}
+
+.m-panel::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.m-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+.m-panel__head {
+  flex: none;
+  padding: var(--pad) var(--pad) 0;
+}
+
+.m-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: var(--gap) var(--pad);
+}
+
+.m-panel__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--gap) var(--pad) var(--pad);
+  border-top: 1px solid var(--line);
+}
+
+.m-panel__foot > .m-spacer {
+  flex: 1 1 auto;
+}
+
+/* entrance: a few pixels and a fade, gone under reduced motion */
+.m-enter {
+  animation: m-enter 180ms ease-out both;
+}
+
+@keyframes m-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-enter {
+    animation: none;
+  }
+}
+
+/* ---------- confirm-inline: "Sure? YES / NO" ---------- */
+
+.m-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.m-confirm__q {
+  font: 12px/1 var(--font-data);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-right: 2px;
+}
+
+/* ---------- settings controls ---------- */
+
+.m-group__title {
+  font: 11px/1 var(--font-data);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+  margin: calc(var(--gap) * 1.6) 0 var(--gap);
+  padding-top: var(--gap);
+  border-top: 1px solid var(--line);
+}
+
+.m-group:first-child .m-group__title {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.m-row {
+  padding: 10px 0;
+}
+
+.m-row__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.m-row__label {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+}
+
+.m-row__value {
+  font: 13px/1 var(--font-data);
+  color: var(--mint);
+  white-space: nowrap;
+}
+
+.m-row__hint {
+  font: 11px/1.5 var(--font-data);
+  color: var(--mute);
+  margin-top: 6px;
+  max-width: 54ch;
+}
+
+/* range: a native input so dragging it is free; a thin track inside a tall, easy-to-hit box */
+.m-range {
+  display: block;
+}
+
+.m-range input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.m-range input[type='range']::-webkit-slider-runnable-track {
+  height: 3px;
+  background: var(--line);
+}
+
+.m-range input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6.5px;
+  background: var(--mint);
+  border: none;
+  border-radius: 0;
+}
+
+.m-range input[type='range']::-moz-range-track {
+  height: 3px;
+  background: var(--line);
+  border: none;
+}
+
+.m-range input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--mint);
+  border: none;
+  border-radius: 0;
+}
+
+.m-range input[type='range']:focus {
+  outline: none;
+}
+
+.m-range input[type='range'].is-focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(141, 255, 207, 0.35);
+}
+
+.m-range input[type='range'].is-focus::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(141, 255, 207, 0.35);
+}
+
+/* toggle: a drawn switch, not a native checkbox, so it matches the rest of the kit */
+.m-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--mute);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0;
+  cursor: pointer;
+  font: 12px/1 var(--font-data);
+  letter-spacing: 0.1em;
+}
+
+.m-switch__track {
+  width: 38px;
+  height: 20px;
+  border: 1px solid var(--line-strong);
+  position: relative;
+  flex: none;
+}
+
+.m-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--mute);
+  transition: transform 120ms ease;
+}
+
+.m-switch.is-on {
+  color: var(--mint);
+}
+
+.m-switch.is-on .m-switch__track {
+  border-color: var(--mint);
+}
+
+.m-switch.is-on .m-switch__thumb {
+  background: var(--mint);
+  transform: translateX(18px);
+}
+
+.m-switch.is-focus {
+  outline: none;
+}
+
+.m-switch.is-focus .m-switch__track {
+  box-shadow: 0 0 0 1px var(--mint);
+}
+
+/* choice: a row of segmented buttons; only the selected one is a tab stop (roving tabindex) */
+.m-seg {
+  display: flex;
+  border: 1px solid var(--line);
+}
+
+.m-seg__btn {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--line);
+  color: var(--mute);
+  font: 12px/1 var(--font-head);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  min-height: 44px;
+  padding: 0 0.6em;
+  cursor: pointer;
+}
+
+.m-seg__btn:first-child {
+  border-left: none;
+}
+
+.m-seg__btn:hover {
+  color: var(--bone);
+}
+
+.m-seg__btn.is-selected {
+  background: var(--mint);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.m-seg__btn.is-focus {
+  /* two nested rings so the ring reads whether the segment is filled mint (selected) or not:
+     the ink ring shows against the mint fill, the mint ring shows against the dark background */
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px var(--ink),
+    inset 0 0 0 4px var(--mint);
+}
+
+/* ---------- title ---------- */
+
+.m-title-col {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  /* same containing-block reason as .m-scrim: the safe-area clearance has to live in this
+     element's own padding, not on #menus */
+  padding: calc(var(--pad) * 1.4 + var(--sat)) calc(var(--pad) + var(--sar)) calc(var(--pad) + var(--sab))
+    calc(var(--pad) + var(--sal));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.m-title-spacer {
+  flex: 1 1 auto;
+  min-height: 10px;
+}
+
+.m-wordmark {
+  font-size: clamp(32px, 11vh, 72px);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  margin: 0 0 0.3em -0.08em;
+  color: var(--bone);
+  line-height: 1;
+}
+
+.m-tagline {
+  font: 12px/1 var(--font-data);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+  margin: 0 0 calc(var(--gap) * 1.8);
+}
+
+.m-title-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 11px/1.4 var(--font-data);
+  color: var(--mute);
+  letter-spacing: 0.06em;
+}
+
+.m-title-foot .m-record {
+  color: var(--mint);
+}
+
+/* On a desk the title stands in the middle of the screen — the owner, 16 November 2026: "center the start menu
+   in pc to the center of the screen". The column becomes the whole screen with its contents gathered in the
+   middle of it: the wordmark and the buttons as one block, the foot under them. (A phone keeps the column down
+   its left edge: sideways, the middle is the picture's and the right is the thumb's.) */
+.m-title-col--desk {
+  inset: 0;
+  width: auto;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* the picture behind is brightest in its middle, where the portal is: it is put back a little, under the menu
+     only, so that thin type on it can be read */
+  background: radial-gradient(
+    ellipse 40% 50% at 50% 45%,
+    rgba(5, 8, 11, 0.78) 0%,
+    rgba(5, 8, 11, 0.55) 50%,
+    rgba(5, 8, 11, 0) 100%
+  );
+}
+
+.m-title-col--desk > * {
+  max-width: 100%;
+}
+
+/* the wordmark is as wide as its letters make it; the buttons are a column under it */
+.m-title-col--desk > :first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.m-title-col--desk .m-menu-list {
+  width: min(380px, 100%);
+}
+
+/* the spacer no longer pushes the foot to the bottom of the screen: it is the gap above it */
+.m-title-col--desk .m-title-spacer {
+  flex: 0 0 calc(var(--gap) * 2.4);
+}
+
+/* Tracked type carries its spacing after its last letter, which would put the letters left of the middle by half
+   of it: the same again in front of the first puts them back. */
+.m-title-col--desk .m-wordmark {
+  margin-left: 0;
+  padding-left: 0.18em;
+  white-space: nowrap;
+}
+
+.m-title-col--desk .m-tagline {
+  padding-left: 0.3em;
+}
+
+.m-title-col--desk .m-title-foot {
+  align-items: center;
+}
+
+.m-title-col--desk .m-title-foot > * {
+  padding-left: 0.06em;
+}
+
+@media (orientation: portrait) {
+  .m-title-col {
+    width: 100%;
+    background: linear-gradient(90deg, rgba(5, 8, 11, 0.82) 0%, rgba(5, 8, 11, 0.6) 70%, rgba(5, 8, 11, 0.6) 100%);
+  }
+
+  /* the 11vh wordmark size assumes a wide landscape column; on a narrow full-width portrait
+     column that overflows "LODESTAR" past the edge, so size it from width here instead */
+  .m-wordmark {
+    font-size: clamp(32px, 13vw, 72px);
+  }
+}
+
+/* ---------- briefing ---------- */
+
+.m-brief-text {
+  font: 13px/1.6 var(--font-data);
+  color: var(--bone);
+  margin: 0 0 var(--gap);
+}
+
+.m-tasks {
+  margin: 0 0 var(--gap);
+  padding: 0;
+  list-style: none;
+  counter-reset: m-task;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.m-tasks li {
+  counter-increment: m-task;
+  display: flex;
+  gap: 10px;
+  font: 13px/1.5 var(--font-data);
+  color: var(--bone);
+}
+
+.m-tasks li::before {
+  content: counter(m-task);
+  flex: none;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  color: var(--mint);
+  font-size: 11px;
+}
+
+.m-closing {
+  font: 12px/1.5 var(--font-data);
+  font-style: italic;
+  color: var(--mute);
+  margin: 0 0 var(--gap);
+}
+
+/* ---------- pause: objectives ---------- */
+
+.m-objectives {
+  margin: 0 0 var(--gap);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.m-obj {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 13px/1.4 var(--font-data);
+  color: var(--bone);
+}
+
+.m-obj__box {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m-obj__box svg {
+  width: 11px;
+  height: 11px;
+  stroke: var(--mint);
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: square;
+}
+
+.m-obj.is-done {
+  color: var(--mute);
+  opacity: 0.7;
+}
+
+.m-obj.is-done .m-obj__box {
+  border-color: var(--mint-dim);
+}
+
+.m-phase {
+  display: inline-block;
+  font: 11px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 0 0 var(--gap);
+}
+
+/* ---------- controls screen ---------- */
+
+.m-switchview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--gap);
+}
+
+.m-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--gap);
+}
+
+.m-table th {
+  text-align: left;
+  font: 10px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+  padding: 0 10px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.m-table td {
+  font: 12px/1.4 var(--font-data);
+  color: var(--bone);
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.m-table tr:last-child td {
+  border-bottom: none;
+}
+
+.m-table td:first-child {
+  color: var(--mute);
+  white-space: nowrap;
+}
+
+.m-schematic {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  margin: 0 auto var(--gap);
+}
+
+.m-schematic text {
+  font: 7px var(--font-data);
+  letter-spacing: 0.06em;
+  fill: var(--mute);
+  text-transform: uppercase;
+}
+
+/* colour classes the inline SVG shapes (not the text, which is always --mute above) pick a stroke from */
+.m-schematic .line-strong {
+  stroke: var(--line-strong);
+}
+
+.m-schematic .mint-dim {
+  stroke: var(--mint-dim);
+}
+
+.m-schematic .mint {
+  stroke: var(--mint);
+  color: var(--mint);
+}
+
+.m-schematic g.mute {
+  stroke: var(--mute);
+}
+
+/* ---------- failed / debrief ---------- */
+
+.m-grade {
+  font-size: clamp(48px, 14vh, 108px);
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  margin: 0 0 var(--gap);
+  color: var(--mint);
+}
+
+.m-grade[data-grade='B'] {
+  color: var(--amber);
+}
+
+.m-grade[data-grade='C'] {
+  color: var(--red);
+}
+
+.m-newbest {
+  display: block;
+  text-align: center;
+  font: 11px/1 var(--font-data);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: calc(var(--gap) * -0.6) 0 var(--gap);
+}
+
+.m-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 0 var(--gap);
+}
+
+.m-stats__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font: 12px/1.4 var(--font-data);
+}
+
+.m-stats__row:last-child {
+  border-bottom: none;
+}
+
+.m-stats__row dt {
+  color: var(--mute);
+  letter-spacing: 0.04em;
+}
+
+.m-stats__row dd {
+  margin: 0;
+  color: var(--bone);
+  text-align: right;
+}
+
+/* a line of advice under a table of figures */
+.m-note {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 2px solid var(--mint-dim);
+  font: 12px/1.5 var(--font-data);
+  color: var(--bone);
+}
+
+/* ---------- a11y: hide text, keep it for screen readers only, used sparingly ---------- */
+
+.m-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

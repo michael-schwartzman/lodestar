@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Lodestar — menus</title>
+    <link rel="stylesheet" href="/src/ui/ui.css" />
+    <style>
+      /* a stand-in for the game's live 3D scene, so the title screen's transparency can be judged against it */
+      #scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: radial-gradient(120% 90% at 70% 18%, #13232b 0%, #081019 45%, #05080b 100%);
+      }
+
+      #scene .moon {
+        position: absolute;
+        top: 7%;
+        right: 10%;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--bone);
+        opacity: 0.16;
+        filter: blur(1px);
+      }
+
+      #scene .tower {
+        position: absolute;
+        bottom: 0;
+        background: #0c171d;
+        border-top: 1px solid var(--line);
+      }
+
+      #scene .light {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--amber);
+        box-shadow: 0 0 6px 1px rgba(255, 180, 74, 0.55);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene"><div class="moon"></div></div>
+      <div id="ui"></div>
+    </div>
+    <script type="module">
+      import { createSettings } from '/src/settings.js';
+      import { createMenus } from '/src/ui/menus.js';
+
+      // a handful of indicative shapes — not the game's art, just enough to read the title screen's scrim against
+      const scene = document.getElementById('scene');
+      const towers = [
+        [3, 70, 110],
+        [12, 46, 170],
+        [21, 90, 90],
+        [58, 54, 230],
+        [68, 100, 130],
+        [84, 60, 190],
+      ];
+      for (const [leftPct, widthPx, heightPx] of towers) {
+        const tower = document.createElement('div');
+        tower.className = 'tower';
+        tower.style.left = `${leftPct}%`;
+        tower.style.width = `${widthPx}px`;
+        tower.style.height = `${heightPx}px`;
+        scene.append(tower);
+        const light = document.createElement('div');
+        light.className = 'light';
+        light.style.left = `calc(${leftPct}% + ${widthPx / 2}px)`;
+        light.style.bottom = `${heightPx - 8}px`;
+        scene.append(light);
+      }
+
+      const q = new URLSearchParams(location.search);
+      const screenName = q.get('screen') || 'title';
+      const touch = q.get('touch') === '1';
+
+      // &insets=top,right,bottom,left stands in for env(safe-area-inset-*) so phone notch/home-bar clearance
+      // can be checked without a real device
+      const insetParts = (q.get('insets') || '')
+        .split(',')
+        .map(Number)
+        .filter((n) => Number.isFinite(n));
+      if (insetParts.length === 4) {
+        const [top, right, bottom, left] = insetParts;
+        const root = document.documentElement.style;
+        root.setProperty('--sat', `${top}px`);
+        root.setProperty('--sar', `${right}px`);
+        root.setProperty('--sab', `${bottom}px`);
+        root.setProperty('--sal', `${left}px`);
+      }
+
+      // every on.* call, as a plain string, for click-through checks to read from window.__calls
+      window.__calls = [];
+      function logged(name) {
+        return (...args) => {
+          const entry = args.length ? `${name}:${args.join(',')}` : name;
+          window.__calls.push(entry);
+          console.log(`[menus] ${entry}`);
+        };
+      }
+
+      const settings = createSettings(null);
+      window.__settings = settings; // so a click-through script can assert with settings.get(key)
+
+      const menus = createMenus({
+        root: document.getElementById('ui'),
+        settings,
+        touch,
+        on: {
+          deploy: logged('deploy'),
+          begin: logged('begin'),
+          resume: logged('resume'),
+          restart: logged('restart'),
+          quit: logged('quit'),
+          sound: logged('sound'),
+        },
+      });
+      window.__menus = menus;
+
+      const SAMPLE = {
+        title: { record: q.get('record') === '0' ? null : { seconds: 462, grade: 'A' } },
+        briefing: {},
+        pause: {
+          phase: 'Infiltration',
+          objectives: [
+            { text: 'Shut down every guard machine on the site.', done: true },
+            { text: 'Rig the cascade hall, the feed room and the switchgear with charges.', done: false },
+            { text: 'Stand the lodestar on the pad by the vent stack.', done: false },
+            { text: 'Reach the pickup on the south road before Hammerfall lands.', done: false },
+          ],
+        },
+        settings: {},
+        controls: {},
+        failed: {
+          reason: q.get('reason') === 'lost' ? 'lost' : 'down',
+          stats: { seconds: 221, kills: 4, total: 9, charges: 1 },
+        },
+        debrief: {
+          stats: {
+            seconds: 462,
+            shots: 38,
+            hits: 31,
+            accuracy: 0.82,
+            kills: 9,
+            takedowns: 5,
+            alarms: 1,
+            damage: 35,
+            grade: q.get('grade') || 'A',
+          },
+          record: { seconds: 501, grade: 'B' },
+          newRecord: q.get('newrecord') !== '0',
+        },
+      };
+
+      menus.show(screenName, SAMPLE[screenName] ?? {});
+      window.__ready = true;
+    </script>
+  </body>
+</html>

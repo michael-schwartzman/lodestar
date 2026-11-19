@@ -1,0 +1,365 @@
+{
+  "about": "What the wild build's music and voices were asked for (tools/sound/music.mjs, voice.mjs). Models make something a little different each time they are asked: this is a record of the asking, not a recipe that gives the same files again.",
+  "music": {
+    "model": "lyria-3.5",
+    "preamble": "Instrumental only: no vocals, no choir, no spoken words. About 75 seconds. Underscore for a stealth action video game set in a hidden uranium enrichment site cut deep into a mountain and guarded by machines. Dark, cinematic, industrial, in D minor. Steady from the first bar to the last — no intro that builds up, no breakdown, no silence, no fade-out — so that it can loop.",
+    "cues": {
+      "title": {
+        "scene": "the title and the menus",
+        "intensity": [2, 5],
+        "prompt": "Slow and vast: low brass and cellos holding long notes, a lonely horn motif that keeps returning, a deep pulse like a heartbeat at 60 bpm, cold air around it, one deep drum hit every eight bars. Dread and scale: a mountain at night with something awake inside it."
+      },
+      "infil": {
+        "scene": "unseen, outside the halls: the adit, the cavern, the corridors",
+        "intensity": [1, 4],
+        "prompt": "Almost nothing: a very quiet sub drone, a few sparse high metallic pings with a long cavern echo, a slow soft pulse at 70 bpm far away, pads like held breath. Intensity 2 out of 10 throughout. Someone hiding in the dark."
+      },
+      "hall": {
+        "scene": "unseen, in the cascade hall among the centrifuges",
+        "intensity": [2, 5],
+        "prompt": "Eerie and mechanical: a high shimmering whir like hundreds of spinning rotors turned into glassy harmonics, a slow pulsing low synth under it, ticking machinery in six-eight time, cold and exact. Intensity 3 out of 10 throughout."
+      },
+      "tense": {
+        "scene": "a machine is wary or searching",
+        "intensity": [4, 7],
+        "prompt": "Tension: a steady tactical groove at 95 bpm — a muted kick, ticking hats, a pulsing bass ostinato, short string stabs, a riser now and then. Intensity 5 to 6 out of 10 throughout. They are looking for you."
+      },
+      "combat": {
+        "scene": "a fight, or the alarm",
+        "intensity": [8, 10],
+        "prompt": "Full combat: 150 bpm, pounding distorted kick drums and metallic anvil hits on every beat, a snarling distorted bass riff, aggressive staccato strings and brass stabs, synth screams like sirens. Loud and relentless: intensity 9 out of 10 from the very first second to the last."
+      },
+      "overspeed": {
+        "scene": "the drives pushed past their limit",
+        "intensity": [9, 10],
+        "prompt": "Out of control: 170 bpm, frantic sixteenth-note arpeggios climbing higher and higher, a shrieking rising lead like a siren, heavy pounding drums, everything accelerating towards a breaking point. Intensity 10 out of 10 throughout."
+      },
+      "exfil": {
+        "scene": "the run out before the strike lands",
+        "intensity": [8, 10],
+        "prompt": "A race against a countdown: 160 bpm, driving ostinato strings, big cinematic drums, the tick of a clock on every beat, brass that is heroic and desperate at once, constant forward motion. Intensity 9 out of 10 throughout."
+      },
+      "end": {
+        "scene": "the debrief",
+        "intensity": [1, 4],
+        "prompt": "Aftermath: slow, wide, quiet relief with sorrow in it — warm low strings, a simple piano figure, a distant rumble dying away. 60 bpm. Intensity 2 out of 10 throughout."
+      }
+    }
+  },
+  "voice": {
+    "model": "gemini-3.8-flash-tts",
+    "listener": "gemini-3.8-flash",
+    "speakers": {
+      "warden": {
+        "what": "the site's own mind: every line of src/wild/warden.js",
+        "voice": "Charon",
+        "manner": "none asked for by default: this speech model reads a manner out as often as it takes it; the colour makes it WARDEN",
+        "directions": {
+          "overspeed-3-0": "[pleading]",
+          "overspeed-done-0": "[quiet, tired]"
+        },
+        "unwanted": "shout|excit|cheer|laugh|amus|surpris|happy|playful|sarcas|indignant|upbeat|friendly|bright",
+        "longest": 6.3,
+        "colour": "asetrate=21600,aresample=44100,atempo=1.07,highpass=f=60,bass=g=4:f=120,apad=pad_dur=0.35,aecho=0.9:0.55:23|41:0.28|0.18,acompressor=threshold=-20dB:ratio=3:attack=5:release=90",
+        "lufs": -19,
+        "kbps": 48
+      },
+      "pa": {
+        "what": "the site's public address, a recording: the lines of src/wild/voice.js",
+        "voice": "Kore",
+        "unwanted": "shout|excit|cheer|laugh|amus|surpris|happy|playful|sarcas|upbeat",
+        "longest": 8,
+        "colour": "highpass=f=380,lowpass=f=3200,acompressor=threshold=-24dB:ratio=6:attack=2:release=60:makeup=4,apad=pad_dur=0.6,aecho=0.8:0.5:120|240:0.35|0.18",
+        "lufs": -20,
+        "kbps": 40
+      }
+    }
+  },
+  "sfx": {
+    "about": "What tools/sound/sfx.mjs asked a video-generating model for (the Interactions API, 18 November 2026): the owner wanted firing, explosion, enemy-fire and centrifuge sounds that are RECOGNISABLE — every sound in the game before tonight was synthesised and a listening model found most of them unrecognisable. Each prompt asks for sound only, 3-4 seconds, a single instance of the thing (one round, one blast) so the onset-cut gives a clean take; 'cut' is the target length after the onset is found; 'gate' is the family of blind labels (tools/sound/listen.mjs LABELS) that count as right; 'tilt' marks the sounds that need the low end raised into what a small speaker can play (docs/WILD-sfx.md, the gate). This is a record of the asking, not a recipe that gives the same files again.",
+    "model": "gemini-omni-1.2-flash",
+    "sounds": {
+      "shotSentry": {
+        "replaces": "shotSentry",
+        "takes": 3,
+        "cut": 1.1,
+        "kbps": 72,
+        "gate": ["gunshot, unsuppressed"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. A heavy military rifle fires a single unsuppressed round, heard from twelve metres away inside a concrete cavern: a sharp crack, a hard boom, and a short rolling echo off rock walls. One shot only, no burst. About one second.",
+        "describe": "a sentry robot's heavy rifle firing one unsuppressed round at the listener, from ten to fifteen metres, in a concrete cavern",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 3,
+          "takes": [
+            {
+              "file": "shotSentry-0.mp3",
+              "label": "gunshot, unsuppressed",
+              "realism": 7,
+              "bandShare": 0.368
+            },
+            {
+              "file": "shotSentry-1.mp3",
+              "label": "gunshot, unsuppressed",
+              "realism": 5,
+              "bandShare": 0.452
+            },
+            {
+              "file": "shotSentry-2.mp3",
+              "label": "gunshot, unsuppressed",
+              "realism": 7,
+              "bandShare": 0.368
+            }
+          ],
+          "old": {
+            "heard": "A single loud gunshot is fired.",
+            "label": "gunshot, unsuppressed",
+            "realism": 2,
+            "faults": ["Sci-fi laser pitch sweep", "No cavern reverberation", "Missing low-frequency thump"],
+            "fixes": [
+              "Replace pitched oscillator with broad-spectrum noise decaying over 150ms",
+              "Add reverb with 2000ms decay and strong early reflections",
+              "Add a transient sine layer dropping from 150Hz to 50Hz over 50ms"
+            ]
+          },
+          "target": -22.4
+        }
+      },
+      "shotDrone": {
+        "replaces": "shotDrone",
+        "takes": 3,
+        "cut": 0.5,
+        "kbps": 72,
+        "gate": ["gunshot, unsuppressed", "gunshot, suppressed"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music, no motor, no machine noise. A single small-calibre gunshot heard from ten metres away inside a concrete cavern: one short, dry, high-pitched crack, lighter and thinner than a rifle, with a brief hard echo off the walls. One shot only, no burst. About half a second.",
+        "describe": "a drone's lighter, faster gun firing one round at the listener in a concrete cavern",
+        "chosen": {
+          "in": false,
+          "tries": 6,
+          "accepted": 0,
+          "note": "Two batches of three, the second with this prompt (the first named a drone, and got motors). Heard blind as a bleep (three times), a motor and gun handling; one generation was refused by the model's own filter. Never as a gunshot: the game's own stays."
+        }
+      },
+      "explosion": {
+        "replaces": "explosion",
+        "takes": 2,
+        "cut": 3.2,
+        "kbps": 80,
+        "gate": ["explosion"],
+        "tilt": true,
+        "prompt": "Sound effect only: no speech, no voice, no music. A single large explosion inside a concrete cavern: a sharp crack, a heavy boom, debris and a long rolling echo. About four seconds.",
+        "describe": "a single large explosion inside a concrete cavern",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 2,
+          "takes": [
+            {
+              "file": "explosion-0.mp3",
+              "label": "explosion",
+              "realism": 3,
+              "bandShare": 0.46
+            },
+            {
+              "file": "explosion-1.mp3",
+              "label": "explosion",
+              "realism": 6,
+              "bandShare": 0.37800000000000006
+            }
+          ],
+          "old": {
+            "heard": "A rapid series of irregular clicks resembling a Geiger counter detecting radiation.",
+            "label": "other",
+            "realism": 1,
+            "faults": [
+              "No cavernous reverberation or echo",
+              "Lacks low-frequency sub-bass impact",
+              "Decay is unnaturally short"
+            ],
+            "fixes": [
+              "Add a dense reverb with a 3 to 5 second decay time",
+              "Layer a sine wave sweeping from 80 Hz down to 30 Hz",
+              "Extend the noise envelope decay to at least 2000 milliseconds"
+            ]
+          },
+          "target": -22.4
+        }
+      },
+      "cascadeBlast": {
+        "replaces": "cascadeBlast",
+        "takes": 2,
+        "cut": 5,
+        "kbps": 80,
+        "gate": ["explosion"],
+        "tilt": true,
+        "prompt": "Sound effect only: no speech, no voice, no music. A huge demolition blast inside a vast underground industrial hall full of machinery: a sharp crack, a massive boom, heavy metal tearing loose and hundreds of machines collapsing, a long echoing rumble. About five seconds.",
+        "describe": "a huge demolition blast in a hall of machinery, metal tearing, a hall of centrifuges going up",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 2,
+          "takes": [
+            {
+              "file": "cascadeBlast-0.mp3",
+              "label": "explosion",
+              "realism": 3,
+              "bandShare": 0.513,
+              "note": "The second of the two that were let in, and now the only one. The first (realism 4 that night) was listened to again by the lead, blind, five times: once it was 'a series of loud, unsuppressed gunshots followed by a rapid barrage of automatic gunfire', four times the listener gave no answer at all. This one was an explosion three times of three."
+            }
+          ],
+          "old": {
+            "heard": "I heard a series of synthetic bleeps and bloops that sound like a retro video game.",
+            "label": "synthetic beep or video game bleep",
+            "realism": 1,
+            "faults": [
+              "Tonal descending pitch sounds like a retro laser",
+              "Complete lack of low-frequency explosion rumble",
+              "No metallic tearing or debris impact sounds"
+            ],
+            "fixes": [
+              "Replace the tonal oscillators with broadband noise bursts",
+              "Add a low-pass filtered noise layer (below 150 Hz) with a 2-second decay for the blast",
+              "Add a metallic layer using comb-filtered noise or FM synthesis with irregular amplitude modulation"
+            ]
+          },
+          "target": -21.1
+        }
+      },
+      "cascadeSpin": {
+        "replaces": "new",
+        "loop": true,
+        "takes": 1,
+        "cut": 4,
+        "kbps": 80,
+        "gate": ["machine hum or drone (steady)", "servo or electric motor", "drone or rotor"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. Inside a hall of hundreds of spinning gas centrifuges: a steady, intense high-pitched mechanical whir, continuous and unbroken, no beginning and no end. About four seconds.",
+        "describe": "a hall of hundreds of spinning gas centrifuges, a steady intense mechanical whir",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 3,
+          "takes": [
+            {
+              "file": "cascadeSpin-0.mp3",
+              "label": "machine hum or drone (steady)",
+              "realism": 4,
+              "bandShare": 0.794
+            }
+          ],
+          "old": null,
+          "target": -18
+        }
+      },
+      "whiz": {
+        "replaces": "new",
+        "takes": 3,
+        "cut": 0.5,
+        "kbps": 64,
+        "gate": ["bullet passing close by"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. No gunshot, no bang, no explosion, no impact, no click. Only the sound of one bullet flying past very close to the microphone at high speed: a very fast 'fffzzzip' of air, a thin whine that falls in pitch as it goes by from one side to the other, like a whip of air or a large insect passing at speed. Nothing before it and nothing after. About half a second.",
+        "describe": "a single bullet passing very close by the listener's head",
+        "chosen": {
+          "in": false,
+          "tries": 6,
+          "accepted": 0,
+          "note": "Two batches of three, the second with this prompt. Heard blind as a gunshot (four times), a click and a noise burst — never as a round going past, which the listener has a word for. It was in the pack for an hour, let in under a gate widened to gunshots; the three files, listened to again, were heard as a footstep, a gunshot and a click. Taken out: nothing is heard for a round that misses."
+        }
+      },
+      "rotorBreak": {
+        "replaces": "new",
+        "takes": 2,
+        "cut": 2.8,
+        "kbps": 80,
+        "gate": ["metal scraping or dragging", "body or heavy object falling", "explosion", "glass breaking"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. Heavy steel machine rotors and casings torn loose from their mountings, crashing down and clattering across a concrete floor: metal shrieking, cracking, heavy pieces falling and rolling to a stop. About three seconds.",
+        "describe": "machine rotors and steel casings tearing loose and clattering to the floor",
+        "chosen": {
+          "in": false,
+          "tries": 3,
+          "accepted": 0
+        }
+      },
+      "shot": {
+        "replaces": "shot",
+        "takes": 3,
+        "cut": 0.7,
+        "kbps": 72,
+        "gate": ["gunshot, suppressed", "gunshot, unsuppressed"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. A suppressed military carbine fires a single round, heard close up: a muffled crack, then the bolt cycling and a metallic mechanical clack immediately after. One shot only. About one second.",
+        "describe": "the player's suppressed carbine firing one round, a muffled crack and the action cycling",
+        "chosen": {
+          "in": false,
+          "tries": 3,
+          "accepted": 3,
+          "note": "All three heard blind as a gunshot, at 4, 6 and 6 for realism. The carbine the game has (pack A's, of 17 November) was heard as a gunshot at 6: no better by the only ear there is, and it is the sound fired ten times a second — not swapped."
+        }
+      },
+      "pistolShot": {
+        "replaces": "pistolShot",
+        "takes": 3,
+        "cut": 0.6,
+        "kbps": 64,
+        "gate": ["gunshot, suppressed", "gunshot, unsuppressed", "shotgun blast"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. A suppressed semi-automatic pistol fires a single round, heard close up: a soft muffled cough and a quick metallic slide action right after. One shot only. About half a second.",
+        "describe": "the player's suppressed pistol firing one round",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 1,
+          "takes": [
+            { "file": "pistolShot-0.mp3", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.547 },
+            { "file": "pistolShot-1.mp3", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.547 },
+            { "file": "pistolShot-2.mp3", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.547 }
+          ],
+          "old": {
+            "heard": "A single loud crack of an unsuppressed gunshot.",
+            "label": "gunshot, unsuppressed",
+            "realism": 5,
+            "faults": ["Lacks mechanical slide noise", "High frequencies are too tonal", "Decay is too abrupt"]
+          },
+          "target": -29.6,
+          "note": "One generation of three passed (the others: gun handling; a gunshot with too little between 150 and 4000 Hz); takes 1 and 2 are that one at 4% faster and slower. Judged against the pistol the game has now."
+        }
+      },
+      "shotgunShot": {
+        "replaces": "shotgunShot",
+        "takes": 3,
+        "cut": 1.2,
+        "kbps": 80,
+        "gate": ["gunshot, suppressed", "gunshot, unsuppressed", "shotgun blast"],
+        "tilt": false,
+        "prompt": "Sound effect only: no speech, no voice, no music. A 12-gauge pump shotgun fires a single unsuppressed round indoors: a very loud, sharp crack, a heavy boom, and a short hard echo off concrete walls. One shot only. About one second.",
+        "describe": "the player's 12-gauge shotgun firing one round indoors, loud",
+        "chosen": {
+          "in": true,
+          "tries": 3,
+          "accepted": 3,
+          "takes": [
+            { "file": "shotgunShot-0.mp3", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.385 },
+            { "file": "shotgunShot-1.mp3", "label": "gunshot, unsuppressed", "realism": 5, "bandShare": 0.589 },
+            { "file": "shotgunShot-2.mp3", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.525 }
+          ],
+          "old": {
+            "heard": "A bullet ricocheting off a metal surface.",
+            "label": "bullet impact or ricochet on metal",
+            "realism": 6,
+            "faults": [
+              "Lacks mechanical firing pin and barrel resonance",
+              "Low-end is too boomy and explosion-like",
+              "Reverb tail is too smooth and noise-like"
+            ]
+          },
+          "target": -27,
+          "note": "Heard as a gunshot, not as a shotgun in particular. Judged against the shotgun the game has now (pack A's), which was heard as a ricochet."
+        }
+      }
+    }
+  }
+}

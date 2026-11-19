@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lodestar — props</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #05080b;
+        color: #9fb3ad;
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #hud {
+        position: fixed;
+        left: 10px;
+        top: 6px;
+        white-space: pre;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+      }
+      #labels {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+      .label {
+        position: absolute;
+        transform: translate(-50%, -100%);
+        color: #cfe8e0;
+        background: rgba(5, 10, 12, 0.55);
+        padding: 1px 4px;
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+      .label.bad {
+        color: #ff8a7a;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="hud"></div>
+    <div id="labels"></div>
+    <script type="module">
+      // A viewer for src/gfx/propModels.js: draws props the way the game will (merged geometry, lit({baked:true})
+      // for the solid and glow({vertexColors:true}) for the glow), with a footprint-box outline so that "fits
+      // its box" can be checked by eye, and reports the same thing as data on window.__props.
+      //
+      // ?show=<kind>|all   which prop(s) to draw (default: all)
+      // &variant=n         which variant to build (default: 0)
+      // &view=front|side|back|quarter|top   camera angle for a single prop (default: quarter)
+      import * as THREE from 'three';
+      import { lit, glow } from '/src/gfx/materials.js';
+      import { PROPS } from '/src/world/props.js';
+      import { buildProp, PROP_KINDS } from '/src/gfx/propModels.js';
+
+      const q = new URLSearchParams(location.search);
+      const show = q.get('show') || 'all';
+      const variant = Number(q.get('variant') ?? 0);
+      const view = q.get('view') || 'quarter';
+
+      // The three "fixing point" kinds are built around a mount, not a footprint; these numbers are the
+      // envelope described in the task for each one and must track what propModels.js actually builds.
+      const SPECIAL_ENVELOPES = {
+        ceilingLight: { min: [-0.6, -0.13, -0.15], max: [0.6, 0.001, 0.15] },
+        wallLight: { min: [-0.17, -0.2, -0.15], max: [0.17, 0.2, 0.001] },
+        pipeRun: { min: [-2, 3.09, -0.45], max: [2, 3.72, 0.45] },
+      };
+      function envelopeFor(kind) {
+        if (SPECIAL_ENVELOPES[kind]) return SPECIAL_ENVELOPES[kind];
+        const spec = PROPS[kind];
+        return { min: [-spec.w / 2, 0, -spec.d / 2], max: [spec.w / 2, spec.h, spec.d / 2] };
+      }
+
+      const BUDGET = {
+        crate: 150,
+        crateTall: 150,
+        barrel: 150,
+        barrier: 150,
+        pallet: 150,
+        ceilingLight: 150,
+        wallLight: 150,
+        rack: 350,
+        console: 350,
+        locker: 350,
+        desk: 350,
+        cylinder: 350,
+        tank: 350,
+        generator: 350,
+        transformer: 350,
+        switchgear: 350,
+        rock: 350,
+        lampPost: 350,
+        roofUnit: 350,
+        dish: 350,
+        pipeRun: 350,
+        truck: 800,
+        forklift: 800,
+        container: 800,
+        tower: 800,
+        ventStack: 800,
+      };
+
+      function triCount(geometry) {
+        if (!geometry) return 0;
+        return (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
+      }
+      function hasAttrs(geometry) {
+        return !!(geometry?.attributes.position && geometry.attributes.normal && geometry.attributes.color);
+      }
+      function findNaN(geometry) {
+        if (!geometry) return false;
+        for (const name of ['position', 'normal', 'color']) {
+          const arr = geometry.attributes[name]?.array;
+          if (!arr) continue;
+          for (let i = 0; i < arr.length; i++) if (!Number.isFinite(arr[i])) return true;
+        }
+        return false;
+      }
+
+      // Checks every kind — not just the one(s) on screen — so that `?show=<anything>` always yields a full
+      // report, and prints a console line for anything that looks like a real problem (not the lampPost's
+      // documented overhang, which is reported but not treated as an error — see the final report).
+      const report = {};
+      for (const kind of PROP_KINDS) {
+        let entry;
+        try {
+          const built = buildProp(kind, variant);
+          const env = envelopeFor(kind);
+          built.solid.computeBoundingBox();
+          const bb = built.solid.boundingBox;
+          const tol = 0.01;
+          const fits =
+            bb.min.x >= env.min[0] - tol &&
+            bb.min.y >= env.min[1] - tol &&
+            bb.min.z >= env.min[2] - tol &&
+            bb.max.x <= env.max[0] + tol &&
+            bb.max.y <= env.max[1] + tol &&
+            bb.max.z <= env.max[2] + tol;
+          const triangles = Math.round(triCount(built.solid));
+          entry = {
+            triangles,
+            glowTriangles: Math.round(triCount(built.glow)),
+            min: [bb.min.x, bb.min.y, bb.min.z],
+            max: [bb.max.x, bb.max.y, bb.max.z],
+            fits,
+            attrsOk: hasAttrs(built.solid) && (!built.glow || hasAttrs(built.glow)),
+            noNaN: !findNaN(built.solid) && !findNaN(built.glow),
+            overBudget: triangles > (BUDGET[kind] ?? Infinity),
+          };
+        } catch (e) {
+          entry = { error: String((e && e.stack) || e) };
+        }
+        report[kind] = entry;
+      }
+      window.__props = report;
+
+      for (const [kind, r] of Object.entries(report)) {
+        if (r.error) {
+          console.error(`${kind}: threw — ${r.error}`);
+          continue;
+        }
+        if (!r.attrsOk) console.warn(`${kind}: missing position/normal/color`);
+        if (!r.noNaN) console.warn(`${kind}: NaN in geometry`);
+        if (r.overBudget) console.warn(`${kind}: ${r.triangles} triangles, over its budget`);
+        if (!r.fits) {
+          const msg = `${kind}: does not fit its envelope — min [${r.min.map((v) => v.toFixed(2))}] max [${r.max.map((v) => v.toFixed(2))}]`;
+          // the lampPost's arm is deliberately built to reach past its footprint cell towards -Z (see the
+          // task note and the final report); every other kind failing this is a real bug.
+          if (kind === 'lampPost') console.info(`${msg} (expected: the lamp arm overhangs on purpose)`);
+          else console.warn(msg);
+        }
+      }
+
+      // --------------------------------------------------------------------------------------------- scene
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
+
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x11161a }),
+      );
+      floor.position.y = -0.002;
+      scene.add(floor);
+      const grid = new THREE.GridHelper(400, 400, 0x2a3338, 0x1c2328);
+      scene.add(grid);
+
+      function footprintOutline(kind) {
+        const env = envelopeFor(kind);
+        const w = env.max[0] - env.min[0],
+          h = Math.max(env.max[1] - env.min[1], 0.02),
+          d = env.max[2] - env.min[2];
+        const cx = (env.max[0] + env.min[0]) / 2,
+          cy = (env.max[1] + env.min[1]) / 2,
+          cz = (env.max[2] + env.min[2]) / 2;
+        const box = new THREE.BoxGeometry(w, h, d);
+        const group = new THREE.Group();
+        group.add(
+          new THREE.LineSegments(
+            new THREE.EdgesGeometry(box),
+            new THREE.LineBasicMaterial({ color: 0x47d7ff, transparent: true, opacity: 0.65 }),
+          ),
+        );
+        group.add(
+          new THREE.Mesh(
+            box,
+            new THREE.MeshBasicMaterial({ color: 0x47d7ff, transparent: true, opacity: 0.06, depthWrite: false }),
+          ),
+        );
+        group.position.set(cx, cy, cz);
+        return group;
+      }
+
+      // The game bakes light into the vertex colour; this copy does the same sum just for the preview
+      // (ambient + two lamps, N·L and a linear falloff), so the shipped lit({baked:true}) path is exercised.
+      const PREVIEW_LIGHTS = [
+        { pos: new THREE.Vector3(6, 10, 6), color: new THREE.Color(1.05, 1.0, 0.9), range: 26 },
+        { pos: new THREE.Vector3(-7, 4, -5), color: new THREE.Color(0.3, 0.4, 0.55), range: 20 },
+      ];
+      const AMBIENT = 0.33;
+      function litCopy(geometry) {
+        const copy = geometry.clone();
+        const pos = copy.attributes.position;
+        const nrm = copy.attributes.normal;
+        const col = copy.attributes.color;
+        const out = new Float32Array(col.count * 3);
+        const p = new THREE.Vector3(),
+          n = new THREE.Vector3(),
+          toL = new THREE.Vector3();
+        for (let i = 0; i < col.count; i++) {
+          p.fromBufferAttribute(pos, i);
+          n.fromBufferAttribute(nrm, i);
+          let r = AMBIENT,
+            g = AMBIENT,
+            b = AMBIENT;
+          for (const L of PREVIEW_LIGHTS) {
+            toL.copy(L.pos).sub(p);
+            const dist = toL.length();
+            toL.normalize();
+            const k = Math.max(0, n.dot(toL)) * Math.max(0, 1 - dist / L.range);
+            r += L.color.r * k;
+            g += L.color.g * k;
+            b += L.color.b * k;
+          }
+          out[i * 3] = col.getX(i) * r;
+          out[i * 3 + 1] = col.getY(i) * g;
+          out[i * 3 + 2] = col.getZ(i) * b;
+        }
+        copy.setAttribute('color', new THREE.BufferAttribute(out, 3));
+        copy.computeBoundingBox();
+        copy.computeBoundingSphere();
+        return copy;
+      }
+
+      const solidMaterial = lit({ baked: true });
+      const glowMaterial = glow({ vertexColors: true });
+
+      function addProp(kind, variantN, at) {
+        const built = buildProp(kind, variantN);
+        const group = new THREE.Group();
+        group.add(new THREE.Mesh(litCopy(built.solid), solidMaterial));
+        if (built.glow) group.add(new THREE.Mesh(built.glow, glowMaterial));
+        const outline = footprintOutline(kind);
+        group.add(outline);
+        group.position.set(at[0], at[1], at[2]);
+        scene.add(group);
+        return group;
+      }
+
+      const labelsEl = document.getElementById('labels');
+      const labelAnchors = []; // { el, pos: THREE.Vector3 }
+      function addLabel(text, worldPos, bad) {
+        const el = document.createElement('div');
+        el.className = 'label' + (bad ? ' bad' : '');
+        el.textContent = text;
+        labelsEl.appendChild(el);
+        labelAnchors.push({ el, pos: worldPos.clone() });
+      }
+
+      let frameCount = 0;
+
+      if (show === 'all') {
+        const cols = 6;
+        const pitchX = 9,
+          pitchZ = 10;
+        PROP_KINDS.forEach((kind, i) => {
+          const col = i % cols,
+            row = Math.floor(i / cols);
+          const at = [(col - (cols - 1) / 2) * pitchX, 0, row * pitchZ];
+          const r = report[kind];
+          // a kind that isn't built yet (or throws) is already flagged by the report loop above — skip its
+          // mesh rather than letting one missing builder blank the whole grid while this file is in progress
+          if (!r.error) addProp(kind, variant, at);
+          const label = r.error
+            ? `${kind} v${variant}  (not built)`
+            : `${kind} v${variant}  ${r.triangles}tri${r.glowTriangles ? `+${r.glowTriangles}g` : ''}  ${r.fits ? 'fits' : 'OVER'}`;
+          addLabel(
+            label,
+            new THREE.Vector3(at[0], PROPS[kind] ? PROPS[kind].h + 0.4 : 1, at[2]),
+            !!r.error || (!r.fits && kind !== 'lampPost'),
+          );
+        });
+        const rows = Math.ceil(PROP_KINDS.length / cols);
+        const spanX = cols * pitchX,
+          spanZ = rows * pitchZ;
+        camera.far = 2000;
+        camera.position.set(0, spanZ * 0.95, spanZ * 1.05 - spanZ / 2);
+        camera.lookAt(0, 0, spanZ / 2 - pitchZ / 2);
+        camera.updateProjectionMatrix();
+        void spanX;
+      } else {
+        const kind = show;
+        if (!PROPS[kind]) throw new Error(`unknown prop kind in ?show=: "${kind}"`);
+        addProp(kind, variant, [0, 0, 0]);
+        const env = envelopeFor(kind);
+        const w = env.max[0] - env.min[0],
+          h = env.max[1] - env.min[1],
+          d = env.max[2] - env.min[2];
+        const cx = (env.max[0] + env.min[0]) / 2,
+          cy = (env.max[1] + env.min[1]) / 2,
+          cz = (env.max[2] + env.min[2]) / 2;
+        const radius = Math.max(w, h, d, 0.6) * 0.5;
+        const dist = radius / Math.tan((camera.fov * Math.PI) / 180 / 2) + radius * 1.5;
+        // a ceiling fixture's interesting face is its underside, not its top — look up at it, like a player
+        // would, for every angle except the literal top-down check
+        const vSign = kind === 'ceilingLight' ? -1 : 1;
+        const positions = {
+          front: [cx, cy + vSign * h * 0.15, cz - dist],
+          back: [cx, cy + vSign * h * 0.15, cz + dist],
+          side: [cx + dist, cy + vSign * h * 0.15, cz],
+          quarter: [cx + dist * 0.72, cy + vSign * dist * 0.5, cz - dist * 0.72],
+          top: [cx + 0.001, cy + dist * 1.3, cz + 0.001],
+        };
+        const p = positions[view] || positions.quarter;
+        camera.position.set(p[0], p[1], p[2]);
+        camera.lookAt(cx, cy + vSign * h * 0.08, cz);
+        camera.near = Math.max(0.03, dist * 0.015);
+        camera.far = dist * 8 + 60;
+        camera.updateProjectionMatrix();
+      }
+
+      const hud = document.getElementById('hud');
+      hud.textContent = `show=${show} variant=${variant} view=${view}\n${PROP_KINDS.length} kinds known`;
+
+      function layout() {
+        const w = canvas.clientWidth,
+          h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        return { w, h };
+      }
+
+      function frame() {
+        const { w, h } = layout();
+        for (const { el, pos } of labelAnchors) {
+          const v = pos.clone().project(camera);
+          if (v.z > 1 || v.z < -1) {
+            el.style.display = 'none';
+          } else {
+            el.style.display = '';
+            el.style.left = `${((v.x * 0.5 + 0.5) * w).toFixed(1)}px`;
+            el.style.top = `${((1 - (v.y * 0.5 + 0.5)) * h).toFixed(1)}px`;
+          }
+        }
+        renderer.render(scene, camera);
+        if (frameCount++ === 2) window.__ready = true;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

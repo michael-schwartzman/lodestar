@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lodestar — the art bench</title>
+  </head>
+  <body>
+    <!--
+      The page tools/art/process.mjs drives in a headless browser: the browser has what node has not — a decoder
+      for pictures, a canvas to scale them on, and an encoder for WebP. The arithmetic is tools/art/pixels.mjs.
+    -->
+    <script type="module">
+      import { flatten, grade, mute, seamError, seamless, stats } from './pixels.mjs';
+
+      const canvasOf = (w, h) => {
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        return c;
+      };
+      const base64 = (canvas, type, quality) =>
+        new Promise((done, fail) =>
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return fail(new Error(`could not encode ${type}`));
+              const reader = new FileReader();
+              reader.onload = () => done(String(reader.result).split(',')[1]);
+              reader.onerror = () => fail(reader.error);
+              reader.readAsDataURL(blob);
+            },
+            type,
+            quality,
+          ),
+        );
+      /** A smaller copy, halved step by step so that nothing fine turns to speckle on the way down. */
+      function shrink(source, w, h) {
+        let from = source;
+        while (from.width / 2 >= w && from.height / 2 >= h && (from.width / 2 > w || from.height / 2 > h)) {
+          const half = canvasOf(from.width / 2, from.height / 2);
+          const ctx = half.getContext('2d');
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(from, 0, 0, half.width, half.height);
+          from = half;
+        }
+        if (from.width === w && from.height === h) return from;
+        const out = canvasOf(w, h);
+        const ctx = out.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(from, 0, 0, w, h);
+        return out;
+      }
+      const round = (list) => list.map((v) => +v.toFixed(3));
+
+      /**
+       * @param {object} job
+       * @param {string} job.url      the picture to start from
+       * @param {number[]} job.work   [w, h] to work at: the picture is cropped about its middle to that shape
+       * @param {object|null} job.flatten   options for pixels.flatten, or null to leave the light as it is
+       * @param {object|null} job.seamless  options for pixels.seamless, or null if it is not a tile
+       * @param {object|null} job.grade     options for pixels.grade
+       * @param {boolean} job.grey          take the colour out (an overlay)
+       * @param {number} [job.chroma]       how much of its own colour it keeps, 0 … 1 (the picture of a material)
+       * @param {number[][]} job.sizes      [[name, w, h], …] to write
+       */
+      window.makeTile = async (job) => {
+        const bitmap = await createImageBitmap(await (await fetch(job.url)).blob());
+        const [w, h] = job.work;
+        // making a tile cuts a band off the picture (pixels.seamless): start that much larger, the same both ways
+        const grow = job.seamless ? 1 / (1 - job.seamless.band) : 1;
+        const pw = Math.round(w * grow);
+        const ph = Math.round(h * grow);
+        // the largest piece of the picture that has the shape wanted, about its middle
+        const scale = Math.min(bitmap.width / pw, bitmap.height / ph);
+        const sw = Math.round(pw * scale);
+        const sh = Math.round(ph * scale);
+        const full = canvasOf(sw, sh);
+        full
+          .getContext('2d')
+          .drawImage(bitmap, (bitmap.width - sw) >> 1, (bitmap.height - sh) >> 1, sw, sh, 0, 0, sw, sh);
+        const start = shrink(full, pw, ph);
+        const first = start.getContext('2d').getImageData(0, 0, pw, ph);
+        let rgb = new Float32Array(pw * ph * 3);
+        for (let i = 0, k = 0; i < first.data.length; i += 4, k += 3) {
+          rgb[k] = first.data[i] / 255;
+          rgb[k + 1] = first.data[i + 1] / 255;
+          rgb[k + 2] = first.data[i + 2] / 255;
+        }
+        const before = { seam: seamError(rgb, pw, ph), ...stats(rgb) };
+        // the picture as it was chosen, kept beside the code so that it can be worked again
+        const source = await base64(start, 'image/jpeg', 0.88);
+        if (job.grey)
+          for (let k = 0; k < rgb.length; k += 3)
+            rgb[k] = rgb[k + 1] = rgb[k + 2] = rgb[k] * 0.3 + rgb[k + 1] * 0.59 + rgb[k + 2] * 0.11;
+        if (job.flatten) rgb = flatten(rgb, pw, ph, job.flatten);
+        let tile = { rgb, w: pw, h: ph };
+        if (job.seamless) tile = seamless(rgb, pw, ph, job.seamless);
+        if (job.grade) tile.rgb = grade(tile.rgb, job.grade);
+        if (job.chroma != null && job.chroma < 1) tile.rgb = mute(tile.rgb, job.chroma);
+        const after = { seam: seamError(tile.rgb, tile.w, tile.h), ...stats(tile.rgb) };
+        const made = canvasOf(tile.w, tile.h);
+        const pixels = made.getContext('2d').createImageData(tile.w, tile.h);
+        for (let i = 0, k = 0; i < pixels.data.length; i += 4, k += 3) {
+          pixels.data[i] = Math.round(tile.rgb[k] * 255);
+          pixels.data[i + 1] = Math.round(tile.rgb[k + 1] * 255);
+          pixels.data[i + 2] = Math.round(tile.rgb[k + 2] * 255);
+          pixels.data[i + 3] = 255;
+        }
+        made.getContext('2d').putImageData(pixels, 0, 0);
+        // a wall is only cut along its length, so it comes out taller than it is wide: it is brought back square
+        const work = shrink(made, w, h);
+        const files = {};
+        for (const [name, sw2, sh2] of job.sizes)
+          files[name] = await base64(shrink(work, sw2, sh2), 'image/webp', job.quality ?? 0.86);
+        // three by three of it, small: what it looks like laid as a floor
+        const cell = shrink(work, Math.round((256 * w) / Math.max(w, h)), Math.round((256 * h) / Math.max(w, h)));
+        const sheet = canvasOf(cell.width * 3, cell.height * 3);
+        const sctx = sheet.getContext('2d');
+        for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) sctx.drawImage(cell, x * cell.width, y * cell.height);
+        return {
+          source,
+          files,
+          preview: await base64(sheet, 'image/jpeg', 0.85),
+          before: { seam: round([before.seam.x, before.seam.y]), mean: round(before.mean), std: round(before.std) },
+          after: { seam: round([after.seam.x, after.seam.y]), mean: round(after.mean), std: round(after.std) },
+        };
+      };
+      window.__ready = true;
+    </script>
+  </body>
+</html>

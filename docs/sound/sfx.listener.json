@@ -1,0 +1,96 @@
+{
+  "about": "What gemini-pro-latest said, blind, of each candidate (tools/sound/listen.mjs), 18 November 2026: what it heard, the nearest label, how convincing 1-10 as what it is meant to be, and what gives it away. `old` is the game's own sound where one is being replaced (null for a new sound). `takes` is every generation tried, in order, whether it was shipped or not; `bandShare` is the share of its energy in 150-4000 Hz the gate measured (.work/bands.py), after whatever tilt the processing settled on (see docs/WILD-sfx.md for which sounds needed a tilt and why the figure before it was not kept). What was done with these verdicts is docs/WILD-sfx.md.",
+  "sounds": {
+    "shotSentry": {
+      "meant": "a sentry robot's heavy rifle firing one unsuppressed round at the listener, from ten to fifteen metres, in a concrete cavern",
+      "old": {
+        "heard": "A single loud gunshot is fired.",
+        "label": "gunshot, unsuppressed",
+        "realism": 2,
+        "faults": ["Sci-fi laser pitch sweep", "No cavern reverberation", "Missing low-frequency thump"]
+      },
+      "takes": [
+        { "file": "shotSentry-0", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.27, "shipped": true },
+        { "file": "shotSentry-1", "label": "gunshot, unsuppressed", "realism": 5, "bandShare": 0.37, "shipped": true },
+        { "file": "shotSentry-2", "label": "gunshot, unsuppressed", "realism": 7, "bandShare": 0.45, "shipped": true }
+      ],
+      "shippedAs": ["shotSentry-0.mp3", "shotSentry-1.mp3", "shotSentry-2.mp3"],
+      "note": "shotSentry-2.mp3 is take 1 re-cut at 4% faster speed, not a fourth generation (the brief's own allowance)."
+    },
+    "shotDrone": {
+      "meant": "a drone's lighter, faster gun firing one round at the listener in a concrete cavern",
+      "old": null,
+      "takes": [
+        { "file": "shotDrone-0", "label": "synthetic beep or video game bleep", "realism": 5, "bandShare": 0.33, "shipped": false },
+        { "file": "shotDrone-1", "label": "servo or electric motor", "realism": 6, "bandShare": 0.93, "shipped": false },
+        { "file": "shotDrone-2", "label": "gun handling (magazine, bolt, pump)", "realism": 5, "bandShare": 0.58, "shipped": false }
+      ],
+      "shippedAs": [],
+      "note": "no take heard blind as a gunshot in three tries: the gate's first rule failed every time, so the game's own shotDrone stays."
+    },
+    "explosion": {
+      "meant": "a single large explosion inside a concrete cavern",
+      "old": {
+        "heard": "A rapid series of irregular clicks resembling a Geiger counter detecting radiation.",
+        "label": "other",
+        "realism": 1,
+        "faults": ["No cavernous reverberation or echo", "Lacks low-frequency sub-bass impact", "Decay is unnaturally short"]
+      },
+      "takes": [
+        { "file": "explosion-0", "label": "explosion", "realism": 3, "bandShare": 0.46, "shipped": true },
+        { "file": "explosion-1", "label": "gunshot, unsuppressed", "realism": 4, "bandShare": 0.49, "shipped": false },
+        { "file": "explosion-2", "label": "explosion", "realism": 6, "bandShare": 0.38, "shipped": true }
+      ],
+      "shippedAs": ["explosion-0.mp3", "explosion-1.mp3"],
+      "note": "explosion-1 (take index 1 of 0-2) was heard blind as a gunshot, not an explosion, and was left out; the two shipped takes are candidates 0 and 2."
+    },
+    "cascadeBlast": {
+      "meant": "a huge demolition blast in a hall of machinery, metal tearing, a hall of centrifuges going up",
+      "old": {
+        "heard": "I heard a series of synthetic bleeps and bloops that sound like a retro video game.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 1,
+        "faults": ["Tonal descending pitch sounds like a retro laser", "Complete lack of low-frequency explosion rumble", "No metallic tearing or debris impact sounds"]
+      },
+      "takes": [
+        { "file": "cascadeBlast-0", "label": "explosion", "realism": 4, "bandShare": 0.589, "shipped": true },
+        { "file": "cascadeBlast-1", "label": "explosion", "realism": 3, "bandShare": 0.513, "shipped": true },
+        { "file": "cascadeBlast-2", "label": "gunshot, unsuppressed", "realism": 4, "bandShare": 0.55, "shipped": false }
+      ],
+      "shippedAs": ["cascadeBlast-0.mp3", "cascadeBlast-1.mp3"]
+    },
+    "cascadeSpin": {
+      "meant": "a hall of hundreds of spinning gas centrifuges, a steady intense mechanical whir",
+      "old": null,
+      "takes": [
+        { "file": "cascadeSpin-0", "label": "machine hum or drone (steady)", "realism": 4, "bandShare": 0.794, "shipped": true },
+        { "file": "cascadeSpin-1", "label": "machine hum or drone (steady)", "realism": 6, "bandShare": 0.69, "shipped": false },
+        { "file": "cascadeSpin-2", "label": "machine hum or drone (steady)", "realism": 4, "bandShare": 0.73, "shipped": false }
+      ],
+      "shippedAs": ["cascadeSpin-0.mp3"],
+      "note": "a new loop; only one take is ever played. Played with G.audio.loop, not G.audio.play, so it is exempt from the bed-tonality rule by name, not by nature."
+    },
+    "whiz": {
+      "meant": "a single bullet passing very close by the listener's head",
+      "old": null,
+      "takes": [
+        { "file": "whiz-0", "label": "gunshot, unsuppressed", "realism": 6, "bandShare": 0.29, "shipped": false },
+        { "file": "whiz-1", "label": "user interface click", "realism": 5, "bandShare": 0.4, "shipped": false },
+        { "file": "whiz-2", "label": "gunshot, unsuppressed", "realism": 5, "bandShare": 0.47, "shipped": true }
+      ],
+      "shippedAs": ["whiz-0.mp3", "whiz-1.mp3", "whiz-2.mp3"],
+      "note": "no take was heard blind as 'bullet passing close by' (not one of the listener's fixed labels in practice); the gate allows the gunshot family for this sound too, and whiz-2 cleared it. whiz-0.mp3 and whiz-1.mp3 are whiz-2 re-cut at +4% and -4% speed, not further generations."
+    },
+    "rotorBreak": {
+      "meant": "machine rotors and steel casings tearing loose and clattering to the floor",
+      "old": null,
+      "takes": [
+        { "file": "rotorBreak-0", "label": "heavy machine footstep", "realism": 7, "bandShare": 0.38, "shipped": false },
+        { "file": "rotorBreak-1", "label": "heavy machine footstep", "realism": 7, "bandShare": 0.34, "shipped": false },
+        { "file": "rotorBreak-2", "label": "gunshot, unsuppressed", "realism": 3, "bandShare": 0.3, "shipped": false }
+      ],
+      "shippedAs": [],
+      "note": "no take heard blind as metal tearing/dragging, something heavy falling, an explosion or glass breaking (the four labels the gate allows for it) in three tries: nothing of this is in the game."
+    }
+  }
+}

@@ -1,0 +1,410 @@
+{
+  "about": "What gemini-pro-latest said, blind, of the old and the new of each sound (tools/sound/listen.mjs), 17 November 2026: what it heard, the nearest label, how convincing 1-10 as what it is meant to be, and what gives it away. `old` is the game own sound, `now` the one made again; null: not asked, or no answer. What was done with these verdicts is docs/WILD.md, Sounds made again.",
+  "sounds": {
+    "stepConcrete": {
+      "meant": "one footstep of a soldier in boots on a concrete floor",
+      "old": {
+        "heard": "A short, high-pitched synthetic beep resembling a classic video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 3,
+        "faults": [
+          "Lacks low-frequency weight",
+          "Missing gritty sole texture",
+          "Decay is too abrupt"
+        ]
+      },
+      "now": {
+        "heard": "I heard a short, high-pitched synthetic beep, like a video game menu selection.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Lacks sharp high-frequency transient",
+          "Unnatural tonal resonance in low end",
+          "Missing concrete surface grit"
+        ]
+      }
+    },
+    "stepMetal": {
+      "meant": "one footstep of a soldier in boots on a steel grating",
+      "old": {
+        "heard": "I can hear a single footstep on a hard surface.",
+        "label": "footstep",
+        "realism": 5,
+        "faults": [
+          "Lacks metallic ringing resonance",
+          "Impact lacks low-end weight",
+          "High frequencies sound like generic white noise"
+        ]
+      },
+      "now": {
+        "heard": "It is a short synthetic beep like a video game menu sound.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 6,
+        "faults": [
+          "Resonance is too tonal and bell-like",
+          "Lacks the complex rattle of a grating",
+          "Initial impact is too sharp for a boot"
+        ]
+      }
+    },
+    "stepDirt": {
+      "meant": "one footstep of a soldier in boots on dirt and gravel",
+      "old": {
+        "heard": "A single footstep on a hard surface.",
+        "label": "footstep",
+        "realism": 8,
+        "faults": [
+          "Crunch sounds like filtered white noise",
+          "Lacks secondary gravel scatter",
+          "Low end thump is slightly weak"
+        ]
+      },
+      "now": {
+        "heard": "A single footstep on a hard surface.",
+        "label": "footstep",
+        "realism": 6,
+        "faults": [
+          "Gravel scatter sounds like uniform white noise",
+          "Lacks heavy low-frequency boot impact",
+          "Dirt crunch decays too abruptly"
+        ]
+      }
+    },
+    "stepSentry": {
+      "meant": "one footstep of a heavy walking machine, 300 kg, on concrete",
+      "old": {
+        "heard": "A short sharp click like a button being pressed on a digital interface.",
+        "label": "user interface click",
+        "realism": 5,
+        "faults": [
+          "Lacks low-frequency impact for 300kg weight",
+          "Missing concrete grit and scrape texture",
+          "Mechanical servo sound is too tonal"
+        ]
+      },
+      "now": {
+        "heard": "A short, sharp click, like a button being pressed in a software interface.",
+        "label": "user interface click",
+        "realism": 4,
+        "faults": [
+          "Lacks heavy low-end impact",
+          "Transient lacks gritty concrete texture",
+          "Missing mechanical complexity or rattling"
+        ]
+      }
+    },
+    "sentrySuspicious": {
+      "meant": "a guard robot's short questioning electronic bark from its loudspeaker",
+      "old": {
+        "heard": "A very short, sharp click resembling a user interface interaction.",
+        "label": "user interface click",
+        "realism": 5,
+        "faults": [
+          "Lacks physical loudspeaker resonance",
+          "Pitch envelope is too perfectly linear",
+          "Missing amplifier hiss or static"
+        ]
+      },
+      "now": {
+        "heard": "I hear the sound of a single footstep on a hard surface.",
+        "label": "footstep",
+        "realism": 5,
+        "faults": [
+          "Lacks loudspeaker resonance and distortion",
+          "Waveform is too clean and digital",
+          "No acoustic environment or room reflection"
+        ]
+      }
+    },
+    "sentryAlert": {
+      "meant": "a guard robot's loud alert bark from its loudspeaker: it has seen an intruder",
+      "old": null,
+      "now": {
+        "heard": "A short, low-pitched synthetic buzz resembling a retro video game error sound.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Lacks loudspeaker distortion and resonance",
+          "No environmental acoustic reflections",
+          "Attack is too clean and digital"
+        ]
+      }
+    },
+    "sentryLost": {
+      "meant": "a guard robot's low, giving-up electronic sound: it has lost its target",
+      "old": {
+        "heard": "A short burst of unrecognizable noise.",
+        "label": "noise burst (nothing recognisable)",
+        "realism": 5,
+        "faults": [
+          "Waveform is too clean and pure",
+          "Lacks mechanical or acoustic resonance",
+          "Pitch drop is too linear"
+        ]
+      },
+      "now": {
+        "heard": "A short burst of unrecognisable noise.",
+        "label": "noise burst (nothing recognisable)",
+        "realism": 5,
+        "faults": [
+          "Lacks mechanical acoustic resonance",
+          "Pitch drop is too perfectly linear",
+          "Completely dry with no spatialization"
+        ]
+      }
+    },
+    "sentryDown": {
+      "meant": "a walking machine shutting down: its motors winding down and its body settling",
+      "old": {
+        "heard": "This is a short, low-pitched synthetic bleep reminiscent of a retro video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 2,
+        "faults": [
+          "Sounds like a simple synthetic oscillator",
+          "Missing mechanical clanks and settling impacts",
+          "Pitch envelope is too smooth and artificial"
+        ]
+      },
+      "now": {
+        "heard": "I heard a short burst of unrecognisable noise.",
+        "label": "noise burst (nothing recognisable)",
+        "realism": 2,
+        "faults": [
+          "Sounds like a retro arcade synth beep",
+          "Lacks mechanical friction and gear noise",
+          "No heavy physical impact for settling"
+        ]
+      }
+    },
+    "droneDown": {
+      "meant": "a drone shot down: rotors spinning down and the airframe hitting the floor",
+      "old": {
+        "heard": "A sharp, synthetic click resembling a user interface button press.",
+        "label": "user interface click",
+        "realism": 3,
+        "faults": [
+          "Rotor spin-down sounds like a smooth sci-fi laser sweep instead of buzzing propellers.",
+          "Impact lacks low-end weight sounding like a small plastic toy.",
+          "No mechanical crunch or debris scatter upon impact."
+        ]
+      },
+      "now": {
+        "heard": "A quick, high-pitched synthetic bleep resembling a retro video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 2,
+        "faults": [
+          "Spin down is a pure electronic tone lacking rotor chop",
+          "Impact sound is too weak and lacks physical crunch",
+          "Lacks mechanical motor whine"
+        ]
+      }
+    },
+    "takedown": {
+      "meant": "a machine switched off by hand at its breaker: a clunk and a dying whine",
+      "old": {
+        "heard": "This is a short, synthetic bleep like one from an old video game.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Clunk lacks mechanical weight and low-end impact",
+          "Dying whine sounds like a pure sine wave without motor friction",
+          "Lack of acoustic space or room reverberation"
+        ]
+      },
+      "now": {
+        "heard": "A short synthetic beep.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Breaker clunk lacks mechanical complexity",
+          "Motor whine pitch drops too linearly",
+          "Completely dry with no acoustic space"
+        ]
+      }
+    },
+    "machineStun": {
+      "meant": "a machine hit by an electromagnetic pulse: a burst of electrical arcing",
+      "old": {
+        "heard": "A heavy wooden door slams shut.",
+        "label": "door",
+        "realism": 4,
+        "faults": [
+          "Too tonal and pitch-swept",
+          "Amplitude envelope is too smooth",
+          "Lacks high-frequency chaotic crackle"
+        ]
+      },
+      "now": {
+        "heard": "It is the sound of a loud unsuppressed gunshot.",
+        "label": "gunshot, unsuppressed",
+        "realism": 4,
+        "faults": [
+          "Lacks sharp crackling transients",
+          "Missing high-frequency sizzle",
+          "Tonal element is too static"
+        ]
+      }
+    },
+    "doorOpen": {
+      "meant": "a heavy motorised steel door sliding open",
+      "old": {
+        "heard": "A sharp metallic click resembling a firearm's bolt or pump action being engaged.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 5,
+        "faults": [
+          "Lacks heavy low-end rumble",
+          "Motor whine is too static",
+          "Missing initial mechanical clank"
+        ]
+      },
+      "now": {
+        "heard": "I heard a quick, synthetic two-tone beep resembling a video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Motor whine lacks pitch variation",
+          "Missing low-frequency weight",
+          "Sliding friction sounds like plain white noise"
+        ]
+      }
+    },
+    "doorClose": {
+      "meant": "a heavy motorised steel door sliding shut and latching",
+      "old": {
+        "heard": "I hear a sharp metallic click, like a gun being cocked or a magazine being loaded.",
+        "label": "gun handling (magazine, bolt, pump)",
+        "realism": 4,
+        "faults": [
+          "Sliding phase is too short",
+          "Impact lacks heavy low-end",
+          "Lacks large door resonance"
+        ]
+      },
+      "now": {
+        "heard": "A single heavy footstep on a hard surface.",
+        "label": "footstep",
+        "realism": 4,
+        "faults": [
+          "Motor whine is too constant and lacks load variation",
+          "Sliding friction sounds like generic white noise",
+          "Final latch impact lacks low-frequency weight"
+        ]
+      }
+    },
+    "alarmHit": {
+      "meant": "the first stroke of a facility alarm: a loud electromechanical klaxon hit",
+      "old": {
+        "heard": "A heavy object hits the ground with a deep, resonant thud.",
+        "label": "body or heavy object falling",
+        "realism": 3,
+        "faults": [
+          "Missing mechanical rattle and striker impact",
+          "Lacks acoustic horn resonance",
+          "Completely dry with no environmental space"
+        ]
+      },
+      "now": {
+        "heard": "A low-pitched, synthetic noise burst resembling an explosion from a retro video game.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "Lacks acoustic horn resonance",
+          "Completely dry with no room reverb",
+          "Attack is too perfectly electronic"
+        ]
+      }
+    },
+    "drip": {
+      "meant": "a single drop of water falling into a puddle in a cave",
+      "old": {
+        "heard": "This is a rapid sequence of high-pitched synthetic beeps, like a retro video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Impact lacks high-frequency splash",
+          "Droplet pitch sweep is too slow",
+          "Cave reverb is too uniform"
+        ]
+      },
+      "now": {
+        "heard": "Three short synthetic beeps.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 4,
+        "faults": [
+          "No cave reverberation",
+          "Missing high-frequency impact transient",
+          "Pitch sweep is too simple and synthetic"
+        ]
+      }
+    },
+    "lightsOut": {
+      "meant": "a room's breaker tripping: the lights going out with a clunk and an electrical crackle",
+      "old": {
+        "heard": "A short synthetic beep or video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 5,
+        "faults": [
+          "Crackle sounds like generic white noise",
+          "Clunk lacks mechanical weight",
+          "Decay is too abrupt"
+        ]
+      },
+      "now": {
+        "heard": "A short, sharp click resembling a user interface sound.",
+        "label": "user interface click",
+        "realism": 5,
+        "faults": [
+          "Crackle sounds too tonal and uniform",
+          "Mechanical clunk lacks heavy metallic weight",
+          "Crackle fades out too smoothly"
+        ]
+      }
+    },
+    "lightsOn": {
+      "meant": "a room's breaker thrown back in: a clunk and the hum of lights coming on",
+      "old": {
+        "heard": "A rapid series of synthetic clicks resembling a video game point counter or text scrolling effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 6,
+        "faults": [
+          "Hum is too pure and static",
+          "Breaker clunk lacks mechanical weight",
+          "Hum starts too abruptly"
+        ]
+      },
+      "now": {
+        "heard": "A short synthetic beep resembling a video game sound effect.",
+        "label": "synthetic beep or video game bleep",
+        "realism": 6,
+        "faults": [
+          "Clunk lacks mechanical weight",
+          "Hum is too pure and static",
+          "No room acoustics on the switch"
+        ]
+      }
+    },
+    "hurt": {
+      "meant": "a soldier grunting as he is hit",
+      "old": {
+        "heard": "A short, sharp click like a user interface button being pressed.",
+        "label": "user interface click",
+        "realism": 5,
+        "faults": [
+          "Lacks breathiness at the tail",
+          "Pitch envelope is too smooth",
+          "Missing chest resonance"
+        ]
+      },
+      "now": {
+        "heard": "A sharp, synthetic click resembling a user interface interaction.",
+        "label": "user interface click",
+        "realism": 4,
+        "faults": [
+          "Robotic pitch envelope",
+          "Missing breath noise",
+          "Unnatural vocal tract resonance"
+        ]
+      }
+    }
+  }
+}

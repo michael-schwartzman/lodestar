@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lodestar — the site</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #05080b;
+        color: #9fb3ad;
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      p {
+        position: fixed;
+        left: 12px;
+        top: 4px;
+        margin: 0;
+        text-shadow: 0 0 4px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <p id="info"></p>
+    <script type="module">
+      // The site without the game: stand anywhere and look.
+      //   ?x=64&z=70&yaw=0&pitch=0&y=1.6     where to stand (cells) and which way to face (degrees; yaw 0 = north)
+      //   ?top=1                              the plan of the whole site from above, without the night haze and
+      //                                       without the mountain that is over it; &mountain=1 puts that back
+      //   &night=1  &alarm=1  &exposure=1.4  &fov=74
+      // W A S D and the arrow keys move and turn.
+      import * as THREE from 'three';
+      import { buildSite } from '/src/world/map.js';
+      import { buildWorld, MOON_DIR } from '/src/world/build.js';
+      import { shared } from '/src/gfx/materials.js';
+      import { makeTextures } from '/src/gfx/textures.js';
+      import { createSky } from '/src/gfx/sky.js';
+      import { buildProp } from '/src/gfx/propModels.js';
+      import { buildCentrifugeGeometry } from '/src/gfx/models.js';
+
+      const q = new URLSearchParams(location.search);
+      const num = (key, fallback) => (q.has(key) ? Number(q.get(key)) : fallback);
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.autoClear = false;
+      const scene = new THREE.Scene();
+
+      const t0 = performance.now();
+      const textures = makeTextures({ size: 512, anisotropy: 4 });
+      const t1 = performance.now();
+      const site = buildSite();
+      const world = buildWorld(site, { textures, buildProp, centrifugeGeometry: buildCentrifugeGeometry() });
+      scene.add(world.group);
+      const sky = createSky({ moonDir: MOON_DIR });
+      scene.add(sky.mesh);
+
+      const top = q.get('top') === '1';
+      // seen from above, the mountain is all there is to see: the plan leaves it off unless it is asked for
+      if (top && q.get('mountain') !== '1')
+        for (const mesh of world.group.children) if (mesh.name === 'terrain:rock') mesh.visible = false;
+      const camera = new THREE.PerspectiveCamera(num('fov', top ? 40 : 74), 1, 0.08, 600);
+      const pose = {
+        x: num('x', site.start.x),
+        y: num('y', 1.6),
+        z: num('z', site.start.z),
+        yaw: (num('yaw', -90) * Math.PI) / 180,
+        pitch: (num('pitch', 0) * Math.PI) / 180,
+      };
+      if (top) {
+        Object.assign(pose, {
+          x: num('x', 64),
+          y: num('y', 150),
+          z: num('z', 48),
+          yaw: 0,
+          pitch: -Math.PI / 2 + 0.001,
+        });
+        shared.uFogDensity.value = 0;
+      }
+      shared.uNight.value = num('night', 0);
+      shared.uAlarm.value = num('alarm', 0);
+      shared.uExposure.value = num('exposure', 1);
+      for (const door of world.grid.doors) door.open = num('doors', 0);
+      world.updateDoors(0, []);
+
+      const keys = new Set();
+      addEventListener('keydown', (e) => keys.add(e.code));
+      addEventListener('keyup', (e) => keys.delete(e.code));
+      document.getElementById('info').textContent =
+        `textures ${Math.round(t1 - t0)} ms · bake ${world.stats.bakeMs} ms · ${world.stats.vertices} vertices · ` +
+        `${world.stats.triangles} triangles · ${world.stats.meshes} meshes`;
+      window.__world = world.stats;
+
+      let last = performance.now();
+      let frames = 0;
+      function frame(now) {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        const turn = (keys.has('ArrowLeft') ? 1 : 0) - (keys.has('ArrowRight') ? 1 : 0);
+        const look = (keys.has('ArrowUp') ? 1 : 0) - (keys.has('ArrowDown') ? 1 : 0);
+        const ahead = (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0);
+        const side = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0);
+        pose.yaw += turn * dt * 1.8;
+        pose.pitch = Math.max(-1.5, Math.min(1.5, pose.pitch + look * dt * 1.2));
+        const speed = keys.has('ShiftLeft') ? 14 : 5;
+        pose.x += (-Math.sin(pose.yaw) * ahead + Math.cos(pose.yaw) * side) * dt * speed;
+        pose.z += (-Math.cos(pose.yaw) * ahead - Math.sin(pose.yaw) * side) * dt * speed;
+        camera.position.set(pose.x, pose.y, pose.z);
+        camera.rotation.set(pose.pitch, pose.yaw, 0, 'YXZ');
+        shared.uTime.value = now / 1000;
+        sky.update(camera, now / 1000);
+        renderer.clear();
+        renderer.render(scene, camera);
+        if (++frames === 4) window.__ready = true;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

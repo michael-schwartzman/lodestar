@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lodestar — next props</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #05080b;
+        color: #9fb3ad;
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #hud {
+        position: fixed;
+        left: 10px;
+        top: 6px;
+        white-space: pre;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+      }
+      #labels {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+      .label {
+        position: absolute;
+        transform: translate(-50%, -100%);
+        color: #cfe8e0;
+        background: rgba(5, 10, 12, 0.55);
+        padding: 1px 4px;
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+      .label.bad {
+        color: #ff8a7a;
+      }
+      .label.letter {
+        color: #ffe08a;
+        background: rgba(5, 10, 12, 0.7);
+        font-size: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="hud"></div>
+    <div id="labels"></div>
+    <script type="module">
+      // A viewer for src/gfx/next/props.js: draws the new truck/container the way the game will (merged
+      // geometry, lit({baked:true}) for the solid and glow({vertexColors:true}) for the glow), with a
+      // footprint-box outline so "fits its box" can be checked by eye, and the `letters` drawn as small
+      // outlined quads standing off their surface — this is a copy of tools/preview/props.html, pointed at
+      // the new builders instead of propModels.js's buildProp.
+      //
+      // ?show=<container|truck>|all   which prop(s) to draw (default: all)
+      // &variant=n                    which variant to build (default: 0)
+      // &view=front|side|back|quarter|top|eye   camera angle for a single prop (default: quarter)
+      // &dir=front|side|back          which side the "eye" view stands on (default: front)
+      // &detail=low|medium|high       setGeoDetail preset (default: medium, geo.js's own default)
+      import * as THREE from 'three';
+      import { lit, glow } from '/src/gfx/materials.js';
+      import { PROPS } from '/src/world/props.js';
+      import { setGeoDetail } from '/src/gfx/geo.js';
+      import { buildContainer, buildTruck } from '/src/gfx/next/props.js';
+
+      const q = new URLSearchParams(location.search);
+      const show = q.get('show') || 'all';
+      const variant = Number(q.get('variant') ?? 0);
+      const view = q.get('view') || 'quarter';
+      const eyeDir = q.get('dir') || 'front';
+      const zoom = Number(q.get('zoom') ?? 1); // >1 moves the cardinal-view camera closer, for inspecting detail
+
+      const DETAILS = {
+        low: { bevel: false, round: 1 },
+        medium: { bevel: true, round: 1.5 },
+        high: { bevel: true, round: 2 },
+      };
+      setGeoDetail(DETAILS[q.get('detail')] || DETAILS.medium);
+
+      const KINDS = ['container', 'truck'];
+      const BUILDERS = { container: buildContainer, truck: buildTruck };
+      // the triangle budgets from the task contract, at medium/low detail — "high" has no separate ceiling
+      const BUDGET = {
+        container: { medium: [5000, 14000], low: [0, 4500] },
+        truck: { medium: [10000, 30000], low: [0, 9000] },
+      };
+
+      function envelopeFor(kind) {
+        const spec = PROPS[kind];
+        return { min: [-spec.w / 2, 0, -spec.d / 2], max: [spec.w / 2, spec.h, spec.d / 2] };
+      }
+
+      function triCount(geometry) {
+        if (!geometry) return 0;
+        return (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
+      }
+      function hasAttrs(geometry) {
+        return !!(geometry?.attributes.position && geometry.attributes.normal && geometry.attributes.color);
+      }
+      function findNaN(geometry) {
+        if (!geometry) return false;
+        for (const name of ['position', 'normal', 'color']) {
+          const arr = geometry.attributes[name]?.array;
+          if (!arr) continue;
+          for (let i = 0; i < arr.length; i++) if (!Number.isFinite(arr[i])) return true;
+        }
+        return false;
+      }
+      function checkLetterPlacement(letters, bb) {
+        // the same quick sanity check as .work/check-props.mjs's bounding-box pass: `out` must be a
+        // horizontal unit vector. (The fuller face-based surface check lives in that node script, where it
+        // can walk the whole triangle soup cheaply; here it would re-run on every reload for no benefit.)
+        const problems = [];
+        for (const l of letters || []) {
+          const [ox, oy, oz] = l.out;
+          if (Math.abs(oy) > 1e-6) problems.push(`"${l.text}": out is not horizontal`);
+          if (Math.abs(Math.hypot(ox, oy, oz) - 1) > 1e-4) problems.push(`"${l.text}": out is not a unit vector`);
+        }
+        return problems;
+      }
+
+      // Builds every kind at the requested variant so `?show=<anything>` always yields a full report.
+      const report = {};
+      for (const kind of KINDS) {
+        let entry;
+        try {
+          const built = BUILDERS[kind](variant);
+          const env = envelopeFor(kind);
+          built.solid.computeBoundingBox();
+          const bb = built.solid.boundingBox;
+          const tol = 0.1; // "a few centimetres of overhang... nothing may stick out by more than 10 cm"
+          const fits =
+            bb.min.x >= env.min[0] - tol &&
+            bb.min.y >= -0.02 &&
+            bb.min.z >= env.min[2] - tol &&
+            bb.max.x <= env.max[0] + tol &&
+            bb.max.y <= env.max[1] + tol &&
+            bb.max.z <= env.max[2] + tol;
+          const triangles = Math.round(triCount(built.solid));
+          const budget = BUDGET[kind][q.get('detail') || 'medium'];
+          entry = {
+            built,
+            triangles,
+            glowTriangles: Math.round(triCount(built.glow)),
+            min: [bb.min.x, bb.min.y, bb.min.z],
+            max: [bb.max.x, bb.max.y, bb.max.z],
+            fits,
+            attrsOk: hasAttrs(built.solid) && (!built.glow || hasAttrs(built.glow)),
+            noNaN: !findNaN(built.solid) && !findNaN(built.glow),
+            overBudget: budget ? triangles < budget[0] || triangles > budget[1] : false,
+            letterProblems: checkLetterPlacement(built.letters, bb),
+          };
+        } catch (e) {
+          entry = { error: String((e && e.stack) || e) };
+        }
+        report[kind] = entry;
+      }
+      window.__props = report;
+
+      for (const [kind, r] of Object.entries(report)) {
+        if (r.error) {
+          console.error(`${kind}: threw — ${r.error}`);
+          continue;
+        }
+        if (!r.attrsOk) console.warn(`${kind}: missing position/normal/color`);
+        if (!r.noNaN) console.warn(`${kind}: NaN in geometry`);
+        if (r.overBudget) console.warn(`${kind}: ${r.triangles} triangles, outside its budget`);
+        if (!r.fits)
+          console.warn(
+            `${kind}: does not fit its envelope — min [${r.min.map((v) => v.toFixed(2))}] max [${r.max.map((v) => v.toFixed(2))}]`,
+          );
+        for (const p of r.letterProblems) console.warn(`${kind} letters: ${p}`);
+      }
+
+      // --------------------------------------------------------------------------------------------- scene
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
+
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x11161a }),
+      );
+      floor.position.y = -0.002;
+      scene.add(floor);
+      const grid = new THREE.GridHelper(400, 400, 0x2a3338, 0x1c2328);
+      scene.add(grid);
+
+      function footprintOutline(kind) {
+        const env = envelopeFor(kind);
+        const w = env.max[0] - env.min[0],
+          h = Math.max(env.max[1] - env.min[1], 0.02),
+          d = env.max[2] - env.min[2];
+        const cx = (env.max[0] + env.min[0]) / 2,
+          cy = (env.max[1] + env.min[1]) / 2,
+          cz = (env.max[2] + env.min[2]) / 2;
+        const box = new THREE.BoxGeometry(w, h, d);
+        const group = new THREE.Group();
+        group.add(
+          new THREE.LineSegments(
+            new THREE.EdgesGeometry(box),
+            new THREE.LineBasicMaterial({ color: 0x47d7ff, transparent: true, opacity: 0.65 }),
+          ),
+        );
+        group.add(
+          new THREE.Mesh(
+            box,
+            new THREE.MeshBasicMaterial({ color: 0x47d7ff, transparent: true, opacity: 0.06, depthWrite: false }),
+          ),
+        );
+        group.position.set(cx, cy, cz);
+        return group;
+      }
+
+      // The game bakes light into the vertex colour; this copy does the same sum just for the preview
+      // (ambient + two lamps, N·L and a linear falloff), so the shipped lit({baked:true}) path is exercised.
+      const PREVIEW_LIGHTS = [
+        { pos: new THREE.Vector3(6, 10, 6), color: new THREE.Color(1.05, 1.0, 0.9), range: 26 },
+        { pos: new THREE.Vector3(-7, 4, -5), color: new THREE.Color(0.3, 0.4, 0.55), range: 20 },
+      ];
+      const AMBIENT = 0.33;
+      function litCopy(geometry) {
+        const copy = geometry.clone();
+        const pos = copy.attributes.position;
+        const nrm = copy.attributes.normal;
+        const col = copy.attributes.color;
+        const out = new Float32Array(col.count * 3);
+        const p = new THREE.Vector3(),
+          n = new THREE.Vector3(),
+          toL = new THREE.Vector3();
+        for (let i = 0; i < col.count; i++) {
+          p.fromBufferAttribute(pos, i);
+          n.fromBufferAttribute(nrm, i);
+          let r = AMBIENT,
+            g = AMBIENT,
+            b = AMBIENT;
+          for (const L of PREVIEW_LIGHTS) {
+            toL.copy(L.pos).sub(p);
+            const dist = toL.length();
+            toL.normalize();
+            const k = Math.max(0, n.dot(toL)) * Math.max(0, 1 - dist / L.range);
+            r += L.color.r * k;
+            g += L.color.g * k;
+            b += L.color.b * k;
+          }
+          out[i * 3] = col.getX(i) * r;
+          out[i * 3 + 1] = col.getY(i) * g;
+          out[i * 3 + 2] = col.getZ(i) * b;
+        }
+        copy.setAttribute('color', new THREE.BufferAttribute(out, 3));
+        copy.computeBoundingBox();
+        copy.computeBoundingSphere();
+        return copy;
+      }
+
+      const solidMaterial = lit({ baked: true });
+      const glowMaterial = glow({ vertexColors: true });
+
+      const TONE_COLOR = { white: 0xf2f0e6, hazard: 0xe8c23a, black: 0x1a1a1a, red: 0xc23a2e };
+
+      // a letter is drawn as a small outlined quad standing 12 mm off `at` along `out` (matching the game's
+      // own decal standoff), sized by `height` with a guessed width (we have no font metrics here, only the
+      // shape helpers do) — enough to see that it sits on the surface and faces the right way.
+      function addLetterMarkers(letters, group) {
+        for (const l of letters || []) {
+          const [ox, , oz] = l.out;
+          const w = Math.max(0.12, l.height * l.text.length * 0.56);
+          const h = l.height;
+          const color = TONE_COLOR[l.tone] ?? 0xffffff;
+          const quad = new THREE.Mesh(
+            new THREE.PlaneGeometry(w, h),
+            new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
+          );
+          const outline = new THREE.LineSegments(
+            new THREE.EdgesGeometry(new THREE.PlaneGeometry(w, h)),
+            new THREE.LineBasicMaterial({ color: 0x47d7ff }),
+          );
+          const yaw = Math.atan2(ox, oz); // `out` is horizontal: a plain yaw turns the quad's +Z face to it
+          quad.rotation.y = yaw;
+          outline.rotation.y = yaw;
+          const standoff = 0.012;
+          const pos = [l.at[0] + ox * standoff, l.at[1], l.at[2] + oz * standoff];
+          quad.position.set(...pos);
+          outline.position.set(...pos);
+          group.add(quad, outline);
+          addLabel(l.text, new THREE.Vector3(pos[0] + ox * 0.02, pos[1], pos[2] + oz * 0.02), false, true);
+        }
+      }
+
+      function addProp(kind, variantN, at) {
+        const r = report[kind];
+        const built = r.built;
+        const group = new THREE.Group();
+        group.add(new THREE.Mesh(litCopy(built.solid), solidMaterial));
+        if (built.glow) group.add(new THREE.Mesh(built.glow, glowMaterial));
+        group.add(footprintOutline(kind));
+        addLetterMarkers(built.letters, group);
+        group.position.set(at[0], at[1], at[2]);
+        scene.add(group);
+        return group;
+      }
+
+      const labelsEl = document.getElementById('labels');
+      const labelAnchors = []; // { el, pos: THREE.Vector3 }
+      function addLabel(text, worldPos, bad, isLetter) {
+        const el = document.createElement('div');
+        el.className = 'label' + (bad ? ' bad' : '') + (isLetter ? ' letter' : '');
+        el.textContent = text;
+        labelsEl.appendChild(el);
+        labelAnchors.push({ el, pos: worldPos.clone() });
+      }
+
+      let frameCount = 0;
+
+      if (show === 'all') {
+        const pitchX = 12;
+        KINDS.forEach((kind, i) => {
+          const at = [(i - (KINDS.length - 1) / 2) * pitchX, 0, 0];
+          const r = report[kind];
+          if (!r.error) addProp(kind, variant, at);
+          const label = r.error
+            ? `${kind} v${variant}  (not built)`
+            : `${kind} v${variant}  ${r.triangles}tri${r.glowTriangles ? `+${r.glowTriangles}g` : ''}  ${r.fits ? 'fits' : 'OVER'}${r.overBudget ? ' BUDGET' : ''}`;
+          addLabel(
+            label,
+            new THREE.Vector3(at[0], PROPS[kind] ? PROPS[kind].h + 0.4 : 1, at[2]),
+            !!r.error || !r.fits || r.overBudget,
+          );
+        });
+        camera.far = 2000;
+        camera.position.set(0, 9, 12);
+        camera.lookAt(0, 1, 0);
+        camera.updateProjectionMatrix();
+      } else {
+        const kind = show;
+        if (!PROPS[kind]) throw new Error(`unknown prop kind in ?show=: "${kind}"`);
+        addProp(kind, variant, [0, 0, 0]);
+        const env = envelopeFor(kind);
+        const w = env.max[0] - env.min[0],
+          h = env.max[1] - env.min[1],
+          d = env.max[2] - env.min[2];
+        const cx = (env.max[0] + env.min[0]) / 2,
+          cy = (env.max[1] + env.min[1]) / 2,
+          cz = (env.max[2] + env.min[2]) / 2;
+        const radius = Math.max(w, h, d, 0.6) * 0.5;
+        const dist = (radius / Math.tan((camera.fov * Math.PI) / 180 / 2) + radius * 1.5) / zoom;
+        const positions = {
+          front: [cx, cy + h * 0.15, cz - dist],
+          back: [cx, cy + h * 0.15, cz + dist],
+          side: [cx + dist, cy + h * 0.15, cz],
+          left: [cx - dist, cy + h * 0.15, cz],
+          quarter: [cx + dist * 0.72, cy + dist * 0.5, cz - dist * 0.72],
+          top: [cx + 0.001, cy + dist * 1.3, cz + 0.001],
+        };
+        // "a low view from where a person stands": fixed real-world eye height and distance, not scaled to
+        // the model's own size, standing on whichever side `dir` names
+        const EYE_H = 1.6,
+          EYE_DIST = 4;
+        const eyePositions = {
+          front: [cx, EYE_H, env.min[2] - EYE_DIST],
+          back: [cx, EYE_H, env.max[2] + EYE_DIST],
+          side: [env.max[0] + EYE_DIST, EYE_H, cz],
+          left: [env.min[0] - EYE_DIST, EYE_H, cz],
+        };
+        // the truck's front (bumper/grille) is at -Z; the container's door end is at -X — `door` resolves
+        // to whichever cardinal direction is that kind's own front/door end, so one name works for both
+        const DOOR_END = { container: 'left', truck: 'front' };
+        const resolvedView = view === 'door' ? DOOR_END[kind] : view;
+        const resolvedDir = eyeDir === 'door' ? DOOR_END[kind] : eyeDir;
+        const p =
+          view === 'eye'
+            ? eyePositions[resolvedDir] || eyePositions.front
+            : positions[resolvedView] || positions.quarter;
+        camera.position.set(p[0], p[1], p[2]);
+        if (view === 'eye') camera.lookAt(cx, Math.min(EYE_H, h * 0.6), cz);
+        else camera.lookAt(cx, cy + h * 0.08, cz);
+        camera.near = Math.max(0.03, dist * 0.015);
+        camera.far = dist * 8 + 60;
+        camera.updateProjectionMatrix();
+      }
+
+      const hud = document.getElementById('hud');
+      hud.textContent = `show=${show} variant=${variant} view=${view}${view === 'eye' ? ` dir=${eyeDir}` : ''}\n${KINDS.length} kinds known`;
+
+      function layout() {
+        const w = canvas.clientWidth,
+          h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        return { w, h };
+      }
+
+      function frame() {
+        const { w, h } = layout();
+        for (const { el, pos } of labelAnchors) {
+          const v = pos.clone().project(camera);
+          if (v.z > 1 || v.z < -1) {
+            el.style.display = 'none';
+          } else {
+            el.style.display = '';
+            el.style.left = `${((v.x * 0.5 + 0.5) * w).toFixed(1)}px`;
+            el.style.top = `${((1 - (v.y * 0.5 + 0.5)) * h).toFixed(1)}px`;
+          }
+        }
+        renderer.render(scene, camera);
+        if (frameCount++ === 2) window.__ready = true;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

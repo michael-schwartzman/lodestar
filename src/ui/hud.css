@@ -1,0 +1,1246 @@
+/* The HUD and the touch controls. Sizes are in pixels and viewport units; nothing here depends on a font loading. */
+#hud,
+#touch {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-data);
+  color: var(--bone);
+  --pad: 10px;
+  --l: calc(var(--sal) + var(--pad));
+  --r: calc(var(--sar) + var(--pad));
+  --t: calc(var(--sat) + var(--pad));
+  --b: calc(var(--sab) + var(--pad));
+  /* the touch controls' sizes, known to the HUD too so that it can keep out of their way */
+  --fire: clamp(58px, 21vh, 78px);
+  --btn: clamp(42px, 14vh, 54px);
+  --lift: 46px;
+}
+
+#hud[hidden],
+#touch[hidden],
+#hud [hidden],
+#touch [hidden] {
+  display: none !important;
+}
+
+/* ---------- things that cover the whole picture ---------- */
+.vignette,
+.nvmask,
+.flash,
+.fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vignette {
+  opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(190, 22, 16, 0.55) 100%);
+}
+
+.nvmask {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, 0.82) 100%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+  transition: opacity 0.25s;
+}
+
+#hud.nv .nvmask {
+  opacity: 1;
+}
+
+.flash {
+  background: #fff;
+  opacity: 0;
+  z-index: 30;
+}
+
+.fade {
+  background: #000;
+  opacity: 0;
+  z-index: 31;
+}
+
+/* ---------- the middle of the screen ---------- */
+.cross {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  --gap: 8px;
+  transition: opacity 0.12s;
+}
+
+.cross.hide {
+  opacity: 0;
+}
+
+.cross i {
+  position: absolute;
+  background: rgba(223, 232, 228, 0.9);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.cross i:nth-child(1),
+.cross i:nth-child(2) {
+  width: 8px;
+  height: 1.5px;
+  top: -0.75px;
+}
+
+.cross i:nth-child(1) {
+  right: var(--gap);
+}
+
+.cross i:nth-child(2) {
+  left: var(--gap);
+}
+
+.cross i:nth-child(3),
+.cross i:nth-child(4) {
+  width: 1.5px;
+  height: 8px;
+  left: -0.75px;
+}
+
+.cross i:nth-child(3) {
+  bottom: var(--gap);
+}
+
+.cross i:nth-child(4) {
+  top: var(--gap);
+}
+
+.cross b {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  left: -1px;
+  top: -1px;
+  background: rgba(223, 232, 228, 0.9);
+}
+
+/* the tick that says a round landed */
+.cross em {
+  position: absolute;
+  left: -11px;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  opacity: 0;
+  background:
+    linear-gradient(45deg, transparent 46%, #fff 46% 54%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, #fff 46% 54%, transparent 54%);
+  -webkit-mask: radial-gradient(circle, transparent 4px, #000 5px);
+  mask: radial-gradient(circle, transparent 4px, #000 5px);
+}
+
+.cross.hit em {
+  animation: hit 0.22s ease-out;
+}
+
+.cross.kill em {
+  animation: hit 0.3s ease-out;
+  filter: drop-shadow(0 0 3px var(--red)) hue-rotate(0deg);
+  background:
+    linear-gradient(45deg, transparent 44%, var(--red) 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, var(--red) 44% 56%, transparent 56%);
+}
+
+@keyframes hit {
+  from {
+    opacity: 1;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+.aware {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+
+/* one wedge per machine that is noticing you */
+.aware i {
+  position: absolute;
+  left: -15px;
+  top: calc(-1 * min(24vh, 118px));
+  width: 30px;
+  height: 14px;
+  transform-origin: 15px min(24vh, 118px);
+  --fill: 0;
+  background: linear-gradient(to right, var(--bone) calc(var(--fill) * 100%), rgba(223, 232, 228, 0.22) 0);
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+  filter: drop-shadow(0 0 2px #000);
+}
+
+.aware i.warm {
+  background: linear-gradient(to right, var(--amber) calc(var(--fill) * 100%), rgba(255, 180, 74, 0.25) 0);
+}
+
+.aware i.hot {
+  background: var(--red);
+}
+
+.hitdir {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.hitdir i {
+  position: absolute;
+  left: -46px;
+  top: calc(-1 * min(31vh, 150px));
+  width: 92px;
+  height: 18px;
+  border-top: 4px solid var(--red);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  filter: drop-shadow(0 0 4px var(--red));
+}
+
+.hitdir {
+  transform-origin: 0 0;
+}
+
+.note {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 44px);
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  color: var(--mint);
+  text-shadow: 0 0 4px #000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.note.show {
+  opacity: 1;
+}
+
+.note.warn {
+  color: var(--amber);
+}
+
+.note.bad {
+  color: var(--red);
+}
+
+/* ---------- panels ---------- */
+.objectives {
+  position: absolute;
+  left: var(--l);
+  top: var(--t);
+  width: min(310px, 30vw);
+  padding: 8px 10px 9px 12px;
+  background: linear-gradient(to right, rgba(5, 8, 11, 0.62), rgba(5, 8, 11, 0));
+  border-left: 2px solid var(--line-strong);
+}
+
+.objectives h4 {
+  margin: 0 0 6px;
+  font: 600 10px/1 var(--font-data);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+}
+
+.objectives ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.objectives li {
+  position: relative;
+  padding-left: 15px;
+  color: var(--mute);
+  text-shadow: 0 0 3px #000;
+}
+
+.objectives li::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 0.48em;
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+}
+
+.objectives li.now {
+  color: var(--bone);
+}
+
+.objectives li.now::before {
+  border-color: var(--mint);
+  background: var(--mint);
+}
+
+.objectives li.done {
+  color: var(--mint-dim);
+  text-decoration: line-through;
+  text-decoration-color: rgba(79, 174, 143, 0.6);
+}
+
+.objectives li.done::before {
+  background: currentColor;
+}
+
+.objectives li.locked {
+  opacity: 0.5;
+}
+
+.top {
+  position: absolute;
+  top: var(--t);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(430px, 38vw);
+  text-align: center;
+}
+
+.compass {
+  display: block;
+  width: 100%;
+  height: 34px;
+  -webkit-mask: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+  mask: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+.top .now {
+  display: none;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--bone);
+  text-shadow:
+    0 0 3px #000,
+    0 0 6px #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.banner {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 12px 3px;
+  font: 700 15px/1.1 var(--font-data);
+  letter-spacing: 0.14em;
+  white-space: pre;
+  background: rgba(5, 8, 11, 0.7);
+  border: 1px solid currentColor;
+}
+
+.banner.amber {
+  color: var(--amber);
+}
+
+.banner.red {
+  color: var(--red);
+  animation: pulse 0.9s steps(2, jump-none) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    background: rgba(120, 14, 10, 0.75);
+  }
+}
+
+.mini {
+  position: absolute;
+  top: var(--t);
+  right: var(--r);
+  width: 150px;
+  height: 150px;
+}
+
+.mini canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* under the small map, in words: the way you face, the nearest objective, and who is coming from where */
+.bearing {
+  position: absolute;
+  top: calc(var(--t) + 156px);
+  right: var(--r);
+  width: 150px;
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: 0.1em;
+  text-align: right;
+  text-shadow:
+    0 0 3px #000,
+    0 0 6px #000;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.bearing > * {
+  display: block;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.bearing > :empty {
+  display: none;
+}
+
+.bearing .facing {
+  font-weight: 700;
+  color: var(--mint);
+  letter-spacing: 0.16em;
+}
+
+.bearing .facing small {
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--mint-dim);
+}
+
+.bearing .goal {
+  color: var(--amber);
+}
+
+.bearing .goal.go {
+  color: var(--mint);
+}
+
+.bearing .contact {
+  color: var(--amber);
+}
+
+.bearing .contact.hot {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.bearing .more {
+  color: var(--mute);
+}
+
+.status {
+  position: absolute;
+  left: var(--l);
+  bottom: var(--b);
+  width: 236px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.status .zone {
+  margin-bottom: 7px;
+  font: 600 12px/1 var(--font-head);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mint);
+  text-shadow: 0 0 4px #000;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+
+.status .zone.show {
+  opacity: 1;
+}
+
+.status .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  text-shadow: 0 0 3px #000;
+}
+
+.status .row > span:first-child {
+  width: 46px;
+  color: var(--mint-dim);
+}
+
+.status .row > span:last-child {
+  width: 52px;
+  text-align: right;
+}
+
+.status .hp {
+  font: 700 34px/0.9 var(--font-head);
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
+/* Health says what it is (18 November 2026): a number as big as the rounds in the magazine across the screen
+   from it, the word under it, and beside them the stance and a bar that can be seen. It was a hairline. */
+.status .vital {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 4px #000;
+}
+
+.status .vital .count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 62px;
+}
+
+.status .vital .count i {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: var(--mint-dim);
+}
+
+/* the stance over the bar, the two of them as high as the number: the bar sits on the number's foot */
+.status .vital .gauge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 31px;
+}
+
+.status .stance {
+  color: var(--mint-dim);
+}
+
+.bar.health {
+  position: relative;
+  flex: none;
+  height: 10px;
+}
+
+.bar.health u,
+.bar.health i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+
+/* what has just been lost: it stays a moment where the health was, in red, and then goes after it */
+.bar.health u {
+  width: 100%;
+  background: var(--red);
+  transition: width 0.5s ease-out 0.35s;
+}
+
+/* a mark at every quarter */
+.bar.health::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(25% - 1px),
+    rgba(5, 8, 11, 0.75) calc(25% - 1px),
+    rgba(5, 8, 11, 0.75) 25%
+  );
+  pointer-events: none;
+}
+
+.status .vital.warn .hp {
+  color: var(--amber);
+}
+
+.status .vital.warn .bar.health i {
+  background: var(--amber);
+}
+
+.status .vital.low .hp {
+  color: var(--red);
+  animation: vital-low 0.9s ease-in-out infinite;
+}
+
+.status .vital.low .bar.health {
+  border-color: var(--red);
+}
+
+.status .vital.low .bar.health i {
+  background: var(--red);
+}
+
+/* the moment some of it goes */
+.status .vital.hit .hp {
+  color: #fff;
+  text-shadow:
+    0 0 10px var(--red),
+    0 0 4px #000;
+}
+
+.status .vital.hit .bar.health {
+  border-color: var(--red);
+  box-shadow: 0 0 9px var(--red);
+}
+
+@keyframes vital-low {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status .vital.low .hp {
+    animation: none;
+  }
+}
+
+.bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(5, 8, 11, 0.6);
+  border: 1px solid var(--line);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--bone);
+  transition: width 0.15s linear;
+}
+
+.bar.low i {
+  background: var(--red);
+}
+
+.bar.light {
+  height: 3px;
+}
+
+.bar.light i {
+  background: var(--amber);
+}
+
+.seen.ok {
+  color: var(--mint);
+}
+
+.seen.bad {
+  color: var(--amber);
+}
+
+.ammo {
+  position: absolute;
+  right: var(--r);
+  bottom: var(--b);
+  text-align: right;
+  text-shadow: 0 0 4px #000;
+  line-height: 1;
+}
+
+/* two numbers, each with its name under it: what is in the magazine, and every round there is */
+.ammo .counts {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.ammo .count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ammo .count b {
+  font: 700 34px/0.9 var(--font-head);
+  letter-spacing: 0.02em;
+}
+
+.ammo .count.left b {
+  font-size: 22px;
+  color: var(--bone);
+}
+
+.ammo .count i {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: var(--mint-dim);
+}
+
+.ammo small {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  color: var(--mint-dim);
+}
+
+.ammo small .knife {
+  color: var(--mute);
+}
+
+/* everything else that is carried, by the key that takes it in hand: the gun in hand lit, an empty one struck out */
+.ammo small.rack {
+  gap: 10px;
+  margin-top: 5px;
+  letter-spacing: 0.12em;
+  color: var(--mute);
+}
+
+.ammo .rack .on {
+  color: var(--mint);
+}
+
+.ammo .rack .dry {
+  color: var(--red);
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.ammo.low .mag,
+.ammo.scarce .total {
+  color: var(--amber);
+}
+
+.ammo.out .mag,
+.ammo.out .total,
+.ammo.out small .knife {
+  color: var(--red);
+}
+
+.ammo.out small .gun {
+  display: none;
+}
+
+.ammo.reloading .mag {
+  opacity: 0.35;
+}
+
+.ammo.reloading small .gun {
+  color: var(--amber);
+}
+
+.prompt {
+  position: absolute;
+  left: 50%;
+  top: 63%;
+  transform: translateX(-50%);
+  padding: 7px 14px 8px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  background: rgba(5, 8, 11, 0.72);
+  border: 1px solid var(--line-strong);
+}
+
+.prompt .bar {
+  height: 3px;
+  margin-top: 6px;
+  border: 0;
+  background: rgba(141, 255, 207, 0.16);
+}
+
+.prompt .bar i {
+  width: 0;
+  background: var(--mint);
+  transition: none;
+}
+
+.radio {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--b) + 64px);
+  transform: translateX(-50%);
+  width: min(620px, 62vw);
+  text-align: center;
+  font: 14px/1.4 var(--font-head);
+  letter-spacing: 0.03em;
+}
+
+.radio p {
+  margin: 3px 0 0;
+  text-shadow:
+    0 0 3px #000,
+    0 0 8px #000,
+    0 1px 1px #000;
+}
+
+.radio b {
+  margin-right: 8px;
+  font: 600 10px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  color: var(--mint);
+}
+
+.bigmap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(5, 8, 11, 0.86);
+  z-index: 5;
+}
+
+.bigmap canvas {
+  width: min(92vw, 122vh);
+  height: min(69vw, 86vh);
+}
+
+.bigmap p {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--mute);
+}
+
+#hud.touch .bigmap p {
+  display: none;
+}
+
+/* the endings: nothing on screen but what is said on the radio */
+#hud.cine > :not(.radio):not(.vignette) {
+  display: none !important;
+}
+
+#hud.cine .radio {
+  left: 50%;
+  right: auto;
+  bottom: calc(var(--b) + 28px);
+  width: min(640px, 84vw);
+  transform: translateX(-50%);
+  font-size: 15px;
+}
+
+/* ---------- on a phone ---------- */
+#hud.touch .objectives,
+#hud.touch .prompt {
+  display: none !important;
+}
+
+#hud.touch .top .now {
+  display: block;
+}
+
+/* upright there is room for the whole line under the compass, on two rows if it needs them */
+@media (orientation: portrait) {
+  #hud.touch .top .now {
+    white-space: normal;
+  }
+}
+
+#hud.touch .top {
+  width: min(300px, 40vw);
+}
+
+#hud.touch .compass {
+  height: 28px;
+}
+
+#hud.touch .banner {
+  margin-top: 4px;
+  font-size: 13px;
+  padding: 3px 9px 2px;
+}
+
+#hud.touch .mini {
+  right: auto;
+  left: var(--l);
+  width: clamp(64px, 24vh, 92px);
+  height: clamp(64px, 24vh, 92px);
+  pointer-events: auto;
+}
+
+#hud.touch .bearing {
+  right: auto;
+  left: var(--l);
+  top: calc(var(--t) + clamp(64px, 24vh, 92px) + 4px);
+  width: clamp(64px, 24vh, 92px);
+  font-size: 9px;
+  line-height: 11px;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+
+#hud.touch .bearing .facing {
+  letter-spacing: 0.08em;
+}
+
+#hud.touch .bearing .facing small {
+  display: none;
+}
+
+#hud.touch .status {
+  width: 158px;
+  font-size: 9px;
+}
+
+#hud.touch .status .zone {
+  display: none;
+}
+
+#hud.touch .status .row {
+  height: 14px;
+  gap: 5px;
+}
+
+#hud.touch .status .row > span:first-child {
+  width: 40px;
+}
+
+#hud.touch .status .row > span:last-child {
+  width: 44px;
+}
+
+/* On a phone health is one row, where the hairline was — there is no room under the left FIRE for more — but it
+   says HEALTH, its bar is three times the light's, and its number is the biggest thing in the panel. (The stance
+   is on the CROUCH button, which lights.) */
+#hud.touch .status .vital {
+  align-items: center;
+  gap: 5px;
+  height: 17px;
+  margin-bottom: 0;
+}
+
+#hud.touch .status .vital .count {
+  display: contents;
+}
+
+#hud.touch .status .vital .count i {
+  order: 0;
+  width: 40px;
+  margin-top: 0;
+  letter-spacing: 0.14em;
+  text-align: left;
+}
+
+#hud.touch .status .vital .gauge {
+  order: 1;
+  height: auto;
+  justify-content: center;
+}
+
+#hud.touch .status .stance {
+  display: none;
+}
+
+#hud.touch .status .hp {
+  order: 2;
+  width: 44px;
+  font-size: 17px;
+  line-height: 1;
+  text-align: right;
+}
+
+#hud.touch .bar.health {
+  height: 9px;
+}
+
+#hud.touch .ammo small {
+  display: none;
+}
+
+#hud.touch .ammo .counts {
+  gap: 10px;
+}
+
+#hud.touch .ammo .count b {
+  font-size: 26px;
+}
+
+#hud.touch .ammo .count.left b {
+  font-size: 18px;
+}
+
+#hud.touch .ammo .count i {
+  margin-top: 2px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+#hud.touch .radio {
+  left: calc(var(--l) + 168px);
+  right: calc(var(--r) + 200px);
+  bottom: var(--b);
+  width: auto;
+  transform: none;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+#hud.touch .radio p:not(:last-child) {
+  display: none;
+}
+
+#hud.touch .note {
+  top: calc(50% + 34px);
+}
+
+/* ---------- touch controls ---------- */
+#touch {
+  z-index: 4;
+}
+
+.tb {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn);
+  height: var(--btn);
+  border-radius: 50%;
+  border: 1.5px solid rgba(223, 232, 228, 0.5);
+  background: rgba(5, 8, 11, 0.34);
+  color: rgba(223, 232, 228, 0.92);
+  font: 700 9px/1 var(--font-data);
+  letter-spacing: 0.08em;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.tb b {
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.tb.on {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: rgba(79, 174, 143, 0.26);
+}
+
+.tb.fire {
+  width: var(--fire);
+  height: var(--fire);
+  bottom: calc(var(--b) + var(--lift));
+  border-color: rgba(255, 180, 74, 0.8);
+  color: var(--amber);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.tb.fire-r {
+  right: var(--r);
+}
+
+.tb.fire-l {
+  left: var(--l);
+}
+
+/* whichever way the trigger is pulled, both triggers show it */
+#touch.firing .tb.fire {
+  background: rgba(255, 180, 74, 0.34);
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(255, 180, 74, 0.18);
+}
+
+#touch[data-fire='left'] .fire-r,
+#touch[data-fire='right'] .fire-l {
+  display: none;
+}
+
+.tb.reload {
+  right: calc(var(--r) + (var(--fire) - var(--btn)) / 2);
+  bottom: calc(var(--b) + var(--lift) + var(--fire) + 8px);
+  font-size: 8px;
+}
+
+.tb.aim {
+  right: calc(var(--r) + var(--fire) + 10px);
+  bottom: calc(var(--b) + var(--lift));
+}
+
+.tb.crouch {
+  right: calc(var(--r) + var(--fire) + 10px);
+  bottom: calc(var(--b) + var(--lift) + var(--btn) + 12px);
+  font-size: 8px;
+}
+
+/* JUMP sits in the bottom row beside AIM, always there; USE comes and goes in the place above it */
+.tb.jump {
+  right: calc(var(--r) + var(--fire) + var(--btn) + 24px);
+  bottom: calc(var(--b) + var(--lift));
+  font-size: 8px;
+}
+
+.tb.use {
+  right: calc(var(--r) + var(--fire) + var(--btn) + 24px);
+  bottom: calc(var(--b) + var(--lift) + var(--btn) + 12px);
+  width: calc(var(--btn) + 10px);
+  height: calc(var(--btn) + 10px);
+  border-color: var(--mint);
+  color: var(--mint);
+  background: rgba(5, 8, 11, 0.5);
+  font-size: 8px;
+  text-align: center;
+  --fill: 0;
+}
+
+.tb.use svg {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.tb.use circle {
+  fill: none;
+  stroke: var(--mint);
+  stroke-width: 3;
+  stroke-dasharray: 113.1;
+  stroke-dashoffset: calc(113.1 * (1 - var(--fill)));
+}
+
+.tb.use b {
+  max-width: 84%;
+  line-height: 1.15;
+}
+
+/* a second button that comes and goes beside USE: take a machine as a shield, or let it go */
+.tb.grab {
+  right: calc(var(--r) + var(--fire) + var(--btn) * 2 + 46px);
+  bottom: calc(var(--b) + var(--lift) + var(--btn) + 12px);
+  width: calc(var(--btn) + 10px);
+  height: calc(var(--btn) + 10px);
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(5, 8, 11, 0.5);
+  font-size: 8px;
+  text-align: center;
+}
+
+.tb.grab b {
+  max-width: 84%;
+  line-height: 1.15;
+}
+
+.tb.pause,
+.tb.nv {
+  top: var(--t);
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+.tb.pause {
+  right: var(--r);
+  gap: 5px;
+}
+
+.tb.pause i {
+  width: 4px;
+  height: 14px;
+  background: currentColor;
+}
+
+.tb.nv {
+  right: calc(var(--r) + 48px);
+}
+
+/* a second row under those two: what is in hand (a tap takes the next gun, a hold works the carbine's selector),
+   and what is left to throw */
+.tb.swap,
+.tb.emp {
+  top: calc(var(--t) + 48px);
+  height: 40px;
+  border-radius: 4px;
+  font-size: 8px;
+}
+
+.tb.emp {
+  right: var(--r);
+  width: 40px;
+  border-color: rgba(141, 255, 207, 0.6);
+  color: var(--mint);
+  text-align: center;
+}
+
+.tb.emp b {
+  max-width: 84%;
+  line-height: 1.2;
+}
+
+.tb.swap {
+  right: calc(var(--r) + 48px);
+  width: 64px;
+  border-color: rgba(255, 180, 74, 0.7);
+  color: var(--amber);
+}
+
+.stick {
+  position: absolute;
+  width: 112px;
+  height: 112px;
+  margin: -56px 0 0 -56px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(223, 232, 228, 0.34);
+  background: rgba(5, 8, 11, 0.2);
+}
+
+.stick i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(223, 232, 228, 0.4);
+  transform: translate(-50%, -50%);
+}
+
+/* held upright there is room below, and none beside */
+@media (orientation: portrait) {
+  #hud.touch .top {
+    top: calc(var(--t) + 50px);
+    width: min(300px, 46vw);
+  }
+
+  #hud.touch .radio {
+    left: var(--l);
+    right: var(--r);
+    bottom: calc(var(--b) + var(--lift) + 190px);
+    font-size: 13px;
+  }
+
+  #hud,
+  #touch {
+    --fire: 78px;
+    --btn: 54px;
+  }
+
+  /* upright there is no second row to be had — the compass is under those buttons — but the first has room */
+  .tb.swap,
+  .tb.emp {
+    top: var(--t);
+  }
+
+  .tb.emp {
+    right: calc(var(--r) + 96px);
+  }
+
+  .tb.swap {
+    right: calc(var(--r) + 144px);
+  }
+}

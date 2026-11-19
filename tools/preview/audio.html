@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lodestar — audio</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #05080b;
+        color: #9fb3ad;
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+      }
+      body {
+        padding: 14px 16px 48px;
+      }
+      h1 {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        color: #cdd9d6;
+        margin: 0 0 10px;
+      }
+      h2 {
+        font-size: 12px;
+        color: #6f8781;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 6px;
+      }
+      .section {
+        margin-top: 18px;
+      }
+      #status {
+        border: 1px solid #233138;
+        padding: 8px 10px;
+        white-space: pre-wrap;
+      }
+      #status.ok {
+        color: #7ee8a6;
+        border-color: #295f45;
+      }
+      #status.bad {
+        color: #ff8f8f;
+        border-color: #5f2929;
+      }
+      .problems {
+        color: #ff8f8f;
+        margin-top: 6px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      button {
+        background: #0c171d;
+        color: #9fb3ad;
+        border: 1px solid #233138;
+        padding: 4px 9px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #152029;
+      }
+      button.active {
+        border-color: #4fd1c5;
+        color: #4fd1c5;
+      }
+      .card {
+        border: 1px solid #1b262c;
+        padding: 5px 7px;
+        display: inline-block;
+        vertical-align: top;
+      }
+      canvas.wave {
+        display: block;
+        background: #081019;
+      }
+      .stats {
+        font-size: 10px;
+        opacity: 0.8;
+        margin-top: 3px;
+        white-space: nowrap;
+      }
+      label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>LODESTAR — sound board</h1>
+    <div id="status">loading…</div>
+
+    <div class="section row">
+      <label>master <input id="masterVol" type="range" min="0" max="1" step="0.01" value="1" /></label>
+      <label>music <input id="musicVolSlider" type="range" min="0" max="1" step="0.01" value="1" /></label>
+    </div>
+
+    <div class="section">
+      <h2>music</h2>
+      <div class="row" id="musicButtons"></div>
+    </div>
+
+    <div class="section">
+      <h2>loops</h2>
+      <div id="loops"></div>
+    </div>
+
+    <div class="section">
+      <h2>one-shots</h2>
+      <div id="sounds"></div>
+    </div>
+
+    <script type="module">
+      // A visual, measurable sound board: every recipe gets a waveform and its seconds/peak/rms, since this
+      // page cannot be listened to. See docs/DESIGN.md §"Sound and the first touch" for the contract.
+      import { createAudio } from '/src/audio/audio.js';
+
+      const audio = createAudio({ enabled: true });
+      const statusEl = document.getElementById('status');
+      const MUSIC_STATES = ['none', 'calm', 'tense', 'combat', 'exfil'];
+
+      // the headless test harness allows autoplay with no gesture; a real visitor still unlocks by clicking
+      for (const type of ['pointerdown', 'touchend', 'mousedown', 'keydown']) {
+        window.addEventListener(type, () => audio.unlock(), { capture: true });
+      }
+
+      function drawWave(canvas, buffer) {
+        const g = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        g.clearRect(0, 0, w, h);
+        g.strokeStyle = '#4fd1c5';
+        g.beginPath();
+        const data = buffer.getChannelData(0);
+        const n = data.length;
+        const step = Math.max(1, Math.floor(n / w));
+        for (let x = 0; x < w; x++) {
+          let lo = 1;
+          let hi = -1;
+          const start = x * step;
+          const end = Math.min(n, start + step);
+          for (let i = start; i < end; i++) {
+            const v = data[i];
+            if (v < lo) lo = v;
+            if (v > hi) hi = v;
+          }
+          if (lo > hi) lo = hi = 0;
+          g.moveTo(x + 0.5, (1 - (hi * 0.5 + 0.5)) * h);
+          g.lineTo(x + 0.5, (1 - (lo * 0.5 + 0.5)) * h);
+        }
+        g.stroke();
+      }
+
+      function card(label, buffer, stat) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        const canvas = document.createElement('canvas');
+        canvas.className = 'wave';
+        canvas.width = 150;
+        canvas.height = 36;
+        div.appendChild(canvas);
+        const info = document.createElement('div');
+        info.className = 'stats';
+        info.textContent = `${label} · ${stat.seconds.toFixed(2)}s · pk ${stat.peak.toFixed(2)} · rms ${stat.rms.toFixed(3)}`;
+        div.appendChild(info);
+        drawWave(canvas, buffer);
+        return div;
+      }
+
+      function renderStatus(test, initMs) {
+        statusEl.className = test.ok ? 'ok' : 'bad';
+        let text = `selfTest: ${test.ok ? 'OK' : 'FAIL'}  ·  ${test.sounds.length} buffers  ·  init ${initMs.toFixed(0)} ms`;
+        if (test.problems.length) text += `\n\n${test.problems.join('\n')}`;
+        statusEl.textContent = text;
+      }
+
+      async function boot() {
+        const t0 = performance.now();
+        const soundsEl = document.getElementById('sounds');
+        const loopsEl = document.getElementById('loops');
+        const musicEl = document.getElementById('musicButtons');
+
+        for (const state of MUSIC_STATES) {
+          const b = document.createElement('button');
+          b.textContent = state;
+          b.onclick = () => {
+            audio.music(state);
+            for (const c of musicEl.children) c.classList.remove('active');
+            b.classList.add('active');
+          };
+          musicEl.appendChild(b);
+        }
+
+        await audio.init((fraction) => {
+          statusEl.textContent = `rendering… ${Math.round(fraction * 100)}%`;
+        });
+        const initMs = performance.now() - t0;
+        audio.unlock();
+
+        const test = audio.selfTest();
+        const { sounds: soundBuffers, loops: loopBufferMap } = audio.debugBuffers();
+        const statByLabel = new Map(test.sounds.map((s) => [s.name, s]));
+        const fallbackStat = (buffer) => ({ seconds: buffer.duration, peak: 0, rms: 0 });
+
+        for (const name of audio.names) {
+          const group = document.createElement('div');
+          group.className = 'row';
+          const b = document.createElement('button');
+          b.textContent = name;
+          b.onclick = () => audio.play(name);
+          group.appendChild(b);
+          const takes = soundBuffers.get(name) || [];
+          takes.forEach((buffer, i) => {
+            const label = takes.length > 1 ? `${name}#${i}` : name;
+            group.appendChild(card(label, buffer, statByLabel.get(label) || fallbackStat(buffer)));
+          });
+          soundsEl.appendChild(group);
+        }
+
+        const handles = new Map();
+        for (const name of audio.loopNames) {
+          const group = document.createElement('div');
+          group.className = 'row';
+          const b = document.createElement('button');
+          b.textContent = `${name} ▶`;
+          b.onclick = () => {
+            if (handles.has(name)) {
+              handles.get(name).stop();
+              handles.delete(name);
+              b.textContent = `${name} ▶`;
+              b.classList.remove('active');
+            } else {
+              handles.set(name, audio.loop(name, { gain: 1 }));
+              b.textContent = `${name} ■`;
+              b.classList.add('active');
+            }
+          };
+          group.appendChild(b);
+          const buffer = loopBufferMap.get(name);
+          if (buffer) group.appendChild(card(name, buffer, statByLabel.get(name) || fallbackStat(buffer)));
+          loopsEl.appendChild(group);
+        }
+
+        document.getElementById('masterVol').oninput = (e) => audio.setVolume({ master: Number(e.target.value) });
+        document.getElementById('musicVolSlider').oninput = (e) => audio.setVolume({ music: Number(e.target.value) });
+
+        renderStatus(test, initMs);
+        window.__audio = { test, initMs, names: audio.names, loopNames: audio.loopNames };
+        window.__ready = true;
+
+        let last = performance.now();
+        function frame(ms) {
+          const dt = Math.min(0.1, (ms - last) / 1000);
+          last = ms;
+          audio.update(dt);
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      boot().catch((e) => {
+        statusEl.className = 'bad';
+        statusEl.textContent = 'FAILED: ' + (e && e.message ? e.message : e);
+        console.error(e);
+        window.__ready = true; // let the harness see the failure instead of hanging forever
+      });
+    </script>
+  </body>
+</html>

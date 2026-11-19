@@ -1,0 +1,232 @@
+{
+  "model": "gemini-3-pro-image",
+  "imageSize": "2K",
+  "styles": {
+    "tile": "A seamless tileable texture swatch for a video game: an albedo (base colour) map. Photographed perfectly straight on, orthographic, in flat shadowless even overcast light: no cast shadows, no bright highlights, no vignette, no perspective, no depth of field. The material fills the whole frame from edge to edge at one uniform scale, with even detail everywhere and no single feature that stands out from the rest. No objects, no people, no text, no logos, no border, no frame. Photorealistic, sharp.",
+    "tileX": "A flat architectural elevation for a video game wall texture: an albedo (base colour) map that repeats seamlessly from left to right. Photographed perfectly straight on, orthographic, in flat shadowless even light: no cast shadows, no bright highlights, no vignette, no perspective. The wall fills the whole frame from edge to edge; the floor line is exactly the bottom edge and the ceiling line is exactly the top edge. Nothing stands in front of it. No people, no text, no logos, no border. Photorealistic, sharp.",
+    "image": "A flat front elevation for a video game texture: an albedo (base colour) map. Photographed perfectly straight on, orthographic, in flat shadowless even light: no cast shadows, no bright highlights, no vignette, no perspective. The object fills the whole frame from edge to edge, with nothing round it. No people, no text, no logos, no border. Photorealistic, sharp.",
+    "overlay": "A seamless tileable greyscale overlay map for a video game, to be multiplied over painted metal. Perfectly flat and evenly lit, orthographic, no shadows, no vignette, no perspective. It fills the whole frame from edge to edge at one uniform scale with even detail everywhere. No objects, no text, no logos, no border. Sharp."
+  },
+  "textures": [
+    {
+      "name": "rock",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "The rock wall of a cavern cut into a mountain by drilling and blasting: dark grey limestone with a faint brown cast, broken into angular facets, with fine fractures, bedding cracks, pale mineral veins and a few damp streaks. The frame covers a piece of wall 4 metres wide and 4 metres high.",
+      "pick": 1,
+      "target": [0.37, 0.335, 0.3],
+      "tint": 0.3
+    },
+    {
+      "name": "concrete",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "The cast concrete wall of an underground military facility: grey board-marked concrete with a regular grid of small round form-tie holes, faint horizontal pour lines, hairline cracks, water streaks and patchy old staining. The frame covers a piece of wall 4 metres wide and 4 metres high.",
+      "pick": 2,
+      "target": [0.484, 0.484, 0.465],
+      "tint": 0.3
+    },
+    {
+      "name": "asphalt",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "A worn asphalt road seen from directly above: dark grey bitumen with fine pale aggregate, hairline cracks, a few thin tar-sealed repairs and faint oil stains, slightly damp. The frame covers a piece of road 4 metres by 4 metres.",
+      "pick": 2,
+      "target": [0.326, 0.326, 0.336],
+      "tint": 0.3
+    },
+    {
+      "name": "dirt",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "The floor of a drainage tunnel seen from directly above: dark wet silt and mud with scattered small angular stones and gravel, smoothed where water has run. The frame covers a piece of ground 4 metres by 4 metres.",
+      "pick": 1,
+      "target": [0.38, 0.34, 0.29],
+      "tint": 0.3
+    },
+    {
+      "name": "floorConcrete",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "The sealed concrete floor of an underground vehicle depot seen from directly above: mid grey power-trowelled concrete, evenly worn all over, with faint trowel swirls, fine hairline cracks, light grey tyre scuffing and many small dark oil drips spread evenly. No large stains, no coloured spills, no joints, no painted lines. The frame covers a piece of floor 4 metres by 4 metres.",
+      "pick": 1,
+      "target": [0.514, 0.514, 0.494],
+      "tint": 0.3
+    },
+    {
+      "name": "floorEpoxy",
+      "kind": "tile",
+      "metres": 4,
+      "prompt": "The epoxy resin floor of a clean industrial hall seen from directly above: smooth grey-green coating with very subtle mottling, faint scuff marks, a few tiny chips and roller marks. No joints, no painted lines, no reflections of lamps. The frame covers a piece of floor 4 metres by 4 metres.",
+      "pick": 2,
+      "target": [0.399, 0.459, 0.419],
+      "tint": 0.6
+    },
+    {
+      "name": "wallPanel",
+      "kind": "tileX",
+      "metres": 4,
+      "prompt": "The wall of a service corridor inside an underground uranium enrichment facility, 4 metres wide and 4 metres high: off-white painted concrete in panels with a vertical joint every 2 metres, a scuffed dark grey painted band along the bottom 40 centimetres, light scuffs and stains at hand height, and a galvanised steel cable tray running along the very top.",
+      "pick": 1,
+      "target": [0.6, 0.61, 0.57],
+      "tint": 0.3
+    },
+    {
+      "name": "hallWall",
+      "kind": "tileX",
+      "metres": 4,
+      "prompt": "The wall of a large clean process hall inside an underground uranium enrichment facility, 4 metres wide and 4 metres high: pale grey-green painted steel cladding panels with a vertical seam every metre, a brushed stainless steel kick plate along the bottom 30 centimetres, and one thin yellow safety stripe at waist height.",
+      "pick": 2,
+      "target": [0.52, 0.56, 0.53],
+      "tint": 0.3
+    },
+    {
+      "name": "wear",
+      "kind": "overlay",
+      "metres": 2,
+      "prompt": "Wear on painted industrial steel, as a neutral light grey map: fine scratches in every direction, scuffs, small chips where paint has flaked to darker metal, dust, and faint vertical grime streaks. Low contrast, mostly light grey, the marks darker. The frame covers a piece of surface 2 metres by 2 metres.",
+      "pick": 1,
+      "target": [0.8, 0.8, 0.8],
+      "tint": 1
+    },
+    {
+      "name": "door",
+      "kind": "image",
+      "aspect": "9:16",
+      "prompt": "One tall narrow leaf of a heavy sliding steel blast door in an underground facility, about 1 metre wide and 2.6 metres tall: grey painted steel plate with a welded frame round its edge, rows of rivets down both sides, a narrow dark window slit at eye height, a recessed handle at waist height, and a band of yellow and black hazard stripes along the bottom. Chipped paint and scuffs.",
+      "pick": 1,
+      "target": [0.42, 0.43, 0.44],
+      "tint": 0.15,
+      "shape": [1, 2]
+    }
+  ],
+  "matter": [
+    {
+      "name": "paint",
+      "kind": "tile",
+      "metres": 1.6,
+      "prompt": "Painted steel plate on a piece of industrial equipment that has been used outdoors for years: one even coat of light neutral grey enamel with a faint orange-peel texture, many small chips and scratches where the paint has come off to dark primer, scuffs, dust, and faint vertical streaks of dirt. No rust. No colour cast: plain neutral grey. The frame covers a piece of plate 1.6 metres wide.",
+      "pick": 2,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "steel",
+      "kind": "tile",
+      "metres": 1.1,
+      "prompt": "Bare hot-rolled mild steel plate, photographed flat and straight on under perfectly even light: uniform dark grey mill scale with a fine, even mottle all over it, fine scratches running in random directions, and faint oil staining. The same everywhere in the frame, edge to edge: no bright patches, no polished or rubbed areas, no highlights, no large marks. No rust, no paint. The frame covers a piece of plate 1.1 metres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "galv",
+      "kind": "tile",
+      "metres": 0.8,
+      "prompt": "Hot-dip galvanised steel sheet: pale silver-grey zinc with the characteristic spangle of irregular crystalline flakes, dulled a little with age, with a few faint patches of white bloom. The frame covers a piece of sheet 0.8 metres wide.",
+      "pick": 2,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "rust",
+      "kind": "tile",
+      "metres": 1.2,
+      "prompt": "Heavily rusted steel plate: mottled orange-brown and dark brown rust, flaking scale, pitting, and a few patches where dark steel still shows. The frame covers a piece of plate 1.2 metres wide.",
+      "pick": 2,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1,
+      "chroma": 0.35
+    },
+    {
+      "name": "gunmetal",
+      "kind": "tile",
+      "metres": 0.22,
+      "prompt": "The matte black phosphate finish of a military rifle's steel receiver, seen from very close: an even, very fine matte micro-texture in charcoal grey, with faint handling marks, tiny scratches and a few slightly shinier patches where it has worn. The frame covers a patch 22 centimetres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "polymer",
+      "kind": "tile",
+      "metres": 0.12,
+      "prompt": "The moulded glass-filled nylon of a rifle's handguard, seen from very close, photographed flat and straight on under perfectly even light: matte, with a fine even pebbled stipple moulded into it, a plain neutral mid grey, with a few light scuffs. The same everywhere in the frame, edge to edge: one flat surface with no gradient, no bands, no edges, no curves and no highlights. The frame covers a patch 12 centimetres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "rubber",
+      "kind": "tile",
+      "metres": 0.3,
+      "prompt": "The black rubber of a lorry tyre's sidewall, seen from close: matte, a little dusty, with a fine moulded texture, faint scuffs and small cracks. Dark grey-black. The frame covers a patch 30 centimetres wide.",
+      "pick": 2,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "fabric",
+      "kind": "tile",
+      "metres": 0.09,
+      "prompt": "Heavy woven nylon cloth, of the kind military webbing and work gloves are made from, seen from very close: a tight plain weave in which every thread can be seen, matte, a plain neutral mid grey. The frame covers a patch 9 centimetres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "wood",
+      "kind": "tile",
+      "metres": 1.2,
+      "prompt": "Rough-sawn softwood, as a packing crate is made of: one continuous surface of timber with the grain running from top to bottom, saw marks across it, a few small knots, weathered and a little dirty, pale grey-brown. No gaps, no nails. The frame covers a piece 1.2 metres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "aluminium",
+      "kind": "tile",
+      "metres": 0.6,
+      "prompt": "Machined aluminium alloy, as the casing of a precision industrial machine is made of, photographed flat and straight on under perfectly even light: satin silver-grey metal with very fine straight parallel turning lines running from left to right, a few faint handling smudges and tiny scratches. The same everywhere in the frame, edge to edge: no bright patches, no reflections of anything, no highlights, no gradient, no curve. The frame covers a piece 0.6 metres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "brass",
+      "kind": "tile",
+      "metres": 0.25,
+      "prompt": "Old unlacquered brass sheet seen from close, photographed flat and straight on under perfectly even light: dull metal with a fine even tarnish, faint darker spotting, long-dried fingermarks and hairline scratches in random directions. The same everywhere in the frame, edge to edge: no bright patches, no reflections of anything, no highlights, no gradient. The frame covers a patch 25 centimetres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "enamel",
+      "kind": "tile",
+      "metres": 1.2,
+      "prompt": "The stove-enamelled steel door of an industrial electrical cabinet, photographed flat and straight on under perfectly even light: one smooth even coat of light neutral grey gloss paint with a very faint orange-peel texture, a few hairline scratches, small scuffs here and there and a little dust. No chips down to bare metal, no rust, no handles, no seams, no vents, no labels. The same everywhere in the frame, edge to edge. The frame covers a piece 1.2 metres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "chequer",
+      "kind": "tile",
+      "metres": 0.5,
+      "prompt": "Steel tread plate, the five-bar chequer plate that industrial steps and decks are made of, seen from directly above under perfectly even light: a regular repeating pattern of small raised lozenge-shaped bars in groups of five, each group at right angles to the next, on a flat plate; worn brighter on the tops of the bars, darker and dirty between them. Plain neutral mid grey steel. The pattern is the same size and evenly spaced everywhere in the frame, edge to edge. The frame covers a piece of plate 0.5 metres wide.",
+      "pick": 2,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    },
+    {
+      "name": "canvas",
+      "kind": "tile",
+      "metres": 1.4,
+      "prompt": "Heavy waxed cotton canvas, as the tarpaulin cover of an army lorry is made of, photographed flat and straight on under perfectly even light: a coarse plain weave with soft shallow creases and folds running in different directions, dusty in the hollows, a little faded. A plain neutral mid grey. One continuous surface: no seams, no eyelets, no ropes, no edges, no stitching. The frame covers a piece 1.4 metres wide.",
+      "pick": 1,
+      "target": [0.5, 0.5, 0.5],
+      "tint": 1
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.work/
+*.log
+.DS_Store
+
+# Generated art: candidates from tools/art/generate.mjs are looked at and thrown away; what is chosen is kept
+# in art/source/ and processed into src/assets/art/
+art/candidates/
+
+# Generated music and voices: candidates from tools/sound/music.mjs and voice.mjs are listened to and thrown
+# away; what is chosen is cut into the files the game fetches (src/wild/music, src/wild/voice)
+sound/candidates/
+
+# Rayfin (hosting on Fabric): local deployment state written by `rayfin up`, never committed
+rayfin/.env
+rayfin/.deployments.json
+rayfin/.temp/
+.env.local
+.env.fabric*

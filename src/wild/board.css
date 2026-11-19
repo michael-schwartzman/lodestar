@@ -1,0 +1,204 @@
+/* The board's own look — everything the rest of the wild build's screens already give it (m-panel, m-head,
+   m-btn, m-stats) is reused as-is; this file only has what is new: the title's link, the list of rows, the
+   callsign field, and the small states (loading, no network, empty). Same palette as ui.css/menus.css. */
+
+.w-board-link {
+  align-self: flex-start;
+  margin: 2px 0 0;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: 11px/1.4 var(--font-data);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mint-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.w-board-link:hover,
+.w-board-link.is-focus {
+  color: var(--mint);
+}
+
+/* a thumb's target, not a cursor's: the game asks for at least 40px on a phone */
+.w-board-link--touch {
+  min-height: 40px;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+.m-title-col--desk .w-board-link {
+  align-self: center;
+}
+
+.w-board-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+  flex-wrap: wrap;
+  margin: 0 0 var(--gap);
+}
+
+.w-board-who {
+  font: 12px/1.4 var(--font-data);
+  color: var(--mute);
+  letter-spacing: 0.04em;
+}
+
+.w-board-who b {
+  color: var(--mint);
+  font-weight: 700;
+}
+
+.w-board-change {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--mint-dim);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.w-board-state {
+  font: 12px/1.5 var(--font-data);
+  color: var(--mute);
+  padding: calc(var(--gap) * 1.5) 0;
+  text-align: center;
+}
+
+.w-board-state--warn {
+  color: var(--amber);
+}
+
+.w-board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 12px/1.4 var(--font-data);
+}
+
+.w-board-row {
+  display: grid;
+  /* place · callsign · score · difficulty · result · time · device: every fixed column as wide as the longest
+     thing it can hold ("999999", "operator", "down", "1666:39", "phone"), and the callsign the rest */
+  grid-template-columns: 2em 1fr 4.4em 5.2em 3em 4.6em 3.4em;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line);
+  color: var(--bone);
+}
+/* a phone held upright has no room for seven columns — at 390 wide they left the callsign none at all. The
+   setting and the device go; what is left is who, how much, how it ended and how long it took. */
+@media (max-width: 600px) {
+  .w-board-row {
+    grid-template-columns: 1.6em 1fr 4.4em 3em 4.6em;
+    gap: 5px;
+    padding: 4px 2px;
+  }
+  .w-board-diff,
+  .w-board-device {
+    display: none;
+  }
+}
+
+.w-board-row > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.w-board-row--self {
+  color: var(--mint);
+  background: rgba(141, 255, 207, 0.08);
+}
+
+.w-board-place {
+  color: var(--mute);
+  text-align: right;
+}
+
+.w-board-score {
+  text-align: right;
+  font-weight: 700;
+}
+
+.w-board-own {
+  margin-top: var(--gap);
+  padding-top: var(--gap);
+  border-top: 1px solid var(--line-strong);
+}
+
+.w-board-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 var(--gap);
+}
+
+.w-board-field label {
+  font: 11px/1.4 var(--font-data);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.w-board-field input {
+  font: 16px/1.4 var(--font-data);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  padding: 10px 12px;
+  border-radius: 2px;
+}
+
+.w-board-field input:focus {
+  outline: none;
+  border-color: var(--mint);
+}
+
+.w-board-why {
+  font: 11px/1.4 var(--font-data);
+  color: var(--red);
+  min-height: 1.4em;
+}
+
+.w-board-public {
+  font: 11px/1.5 var(--font-data);
+  color: var(--mute);
+  margin: 0 0 var(--gap);
+}
+
+.w-board-post {
+  font: 12px/1.5 var(--font-data);
+  color: var(--mint-dim);
+  margin: calc(var(--gap) * 0.6) 0 0;
+}
+
+/* what the mission was worth, line by line: headed as the wild build's own counts are (wild.css `.w-tally`), so
+   that "Charges set 4 / 4" above it and "Charges set +440" in it are not taken for the same table */
+.w-board-lines {
+  border-top: 1px solid var(--mint);
+}
+.w-board-lines::before {
+  content: 'SCORE';
+  padding: 8px 0 2px;
+  font: 10px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  color: var(--mint);
+}
+
+.w-board-post--ok {
+  color: var(--mint);
+}
+
+.w-board-post--warn {
+  color: var(--amber);
+}

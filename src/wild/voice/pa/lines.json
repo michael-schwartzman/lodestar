@@ -1,0 +1,50 @@
+{
+  "alarm-0": {
+    "text": "Attention. Security alert. Intruder on site. All units respond.",
+    "heard": "Attention. Security alert. Intruder on-site. All units, respond.",
+    "said": true,
+    "voice": "Synthesized robotic female voice with alarm echo",
+    "seconds": 6.45,
+    "bytes": 32574
+  },
+  "alarm-1": {
+    "text": "Attention. Security alert. This is not a drill.",
+    "heard": "Attention, security alert. This is not a drill.",
+    "said": true,
+    "voice": "Robotic female announcement with slight echo effect.",
+    "seconds": 4.69,
+    "bytes": 23823
+  },
+  "clear-0": {
+    "text": "Alert cancelled. All units, return to patrol.",
+    "heard": "Alert cancelled. All units, return to patrol.",
+    "said": true,
+    "voice": "Robotic female voice with radio static effect",
+    "seconds": 3.58,
+    "bytes": 18206
+  },
+  "overspeed-0": {
+    "text": "Warning. Drive overspeed in the cascade hall.",
+    "heard": "Warning, drive overspeed in the cascade hall.",
+    "said": true,
+    "voice": "Robotic synthetic automated alert voice with echo",
+    "seconds": 4.66,
+    "bytes": 23692
+  },
+  "blast-0": {
+    "text": "Emergency. Cascade failure. All personnel leave the hall at once.",
+    "heard": "Emergency. Cascade failure. All personnel leave the hall at once.",
+    "said": true,
+    "voice": "Synthesized female computer voice, urgent with echo",
+    "seconds": 6.09,
+    "bytes": 30876
+  },
+  "evacuate-0": {
+    "text": "Evacuate. Evacuate. All personnel to the surface.",
+    "heard": "Evacuate. Evacuate. All personnel to the surface.",
+    "said": true,
+    "voice": "Synthesized female intercom voice with slight echo",
+    "seconds": 5.52,
+    "bytes": 28002
+  }
+}

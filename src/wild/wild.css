@@ -1,0 +1,480 @@
+/* The wild branch's experiment: everything it puts on the screen. Fetched with src/wild/index.js, and only then.
+   Every class here begins `w-`; nothing in the game's own sheets does. */
+
+/* ---------- the overlay: inside the HUD, so it comes and goes with it ---------- */
+.wild {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-data);
+}
+#hud.cine .wild {
+  display: none;
+}
+
+/* ---------- the bar at the foot of the screen: one chip a feature ---------- */
+.w-bar {
+  position: absolute;
+  left: 50%;
+  bottom: var(--b);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+/* a phone's thumbs are down there, and it has no keys to be told of */
+#hud.touch .w-bar {
+  display: none;
+}
+.w-chip {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--bone);
+  background: rgba(5, 8, 11, 0.62);
+  border: 1px solid var(--line);
+  text-shadow: 0 0 4px #000;
+}
+.w-chip[hidden] {
+  display: none;
+}
+.w-chip kbd {
+  font: inherit;
+  padding: 0 4px;
+  color: var(--ink);
+  background: var(--mint);
+}
+.w-chip b {
+  font-weight: 600;
+}
+.w-chip span {
+  color: var(--mint);
+}
+.w-chip i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: calc(var(--level, 0) * 100%);
+  background: var(--mint);
+}
+.w-chip[data-tone='busy'] kbd,
+.w-chip[data-tone='busy'] i {
+  background: var(--amber);
+}
+.w-chip[data-tone='busy'] span {
+  color: var(--amber);
+}
+.w-chip[data-tone='out'] {
+  color: var(--mute);
+}
+.w-chip[data-tone='out'] kbd {
+  background: var(--mute);
+}
+.w-chip[data-tone='out'] span {
+  color: var(--mute);
+}
+
+/* ---------- bent time (focus-live.js): the edges of the picture go cold and close in ---------- */
+.w-focus {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(120, 190, 255, 0) 40%,
+    rgba(70, 130, 210, 0.14) 68%,
+    rgba(4, 10, 26, 0.74) 100%
+  );
+  box-shadow: inset 0 0 140px rgba(110, 180, 255, 0.22);
+}
+/* on a phone FOCUS is a button (the game's own `tb`), in the row NV and the pause are in, to the left of them —
+   and, held upright, to the left of the gun and the grenades too, which are in that row then. The meter is
+   along its foot */
+.w-btn {
+  top: var(--t);
+  right: calc(var(--r) + 96px);
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 8px;
+}
+.w-btn i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(var(--level, 0) * 100%);
+  height: 3px;
+  background: var(--mint);
+}
+.w-btn u {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-style: normal;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+.w-btn.out {
+  border-color: rgba(223, 232, 228, 0.22);
+  color: var(--mute);
+}
+.w-btn.out i {
+  background: var(--mute);
+}
+@media (orientation: portrait) {
+  .w-btn {
+    right: calc(var(--r) + 216px);
+  }
+}
+
+/* on a phone LODESTONE is a button too (the game's own `tb`), a row under the pause and NV — row two there is
+   SWAP/EMP, so this is row three, with room under it in both looks. Its count is its own text in the corner,
+   not a meter along the foot: it only ever holds a small whole number. */
+.w-lode {
+  top: calc(var(--t) + 96px);
+  right: var(--r);
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 8px;
+}
+.w-lode i {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+}
+.w-lode.out {
+  border-color: rgba(223, 232, 228, 0.22);
+  color: var(--mute);
+}
+
+/* ---------- the uplink (uplink-live.js): a ring round the crosshair, and the word over it ---------- */
+.w-link {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.w-link[data-state='ready'],
+.w-link[data-state='linking'],
+.w-link[data-state='cold'] {
+  opacity: 1;
+}
+.w-link svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+.w-link circle {
+  fill: none;
+  stroke-width: 1.5;
+}
+.w-link-rim {
+  stroke: rgba(141, 255, 207, 0.3);
+}
+.w-link-fill {
+  stroke: var(--mint);
+}
+.w-link b {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  font: 400 10px/1 var(--font-data);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--mint);
+  text-shadow: 0 0 4px #000;
+}
+.w-link[data-state='cold'] svg {
+  display: none;
+}
+.w-link[data-state='cold'] b {
+  color: var(--amber);
+}
+
+/* ---------- a drone being flown (pilot-live.js): the picture is the drone's, and says so ---------- */
+.w-cam {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+#hud.w-pilot .w-cam {
+  display: block;
+}
+.w-cam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(141, 255, 207, 0.04) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 0 170px rgba(0, 22, 15, 0.78);
+}
+.w-cam i {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--mint);
+  opacity: 0.8;
+}
+.w-cam i:nth-child(1) {
+  left: 6%;
+  top: 9%;
+  border-right: 0;
+  border-bottom: 0;
+}
+.w-cam i:nth-child(2) {
+  right: 6%;
+  top: 9%;
+  border-left: 0;
+  border-bottom: 0;
+}
+.w-cam i:nth-child(3) {
+  left: 6%;
+  bottom: 9%;
+  border-right: 0;
+  border-top: 0;
+}
+.w-cam i:nth-child(4) {
+  right: 6%;
+  bottom: 9%;
+  border-left: 0;
+  border-top: 0;
+}
+.w-cam b {
+  position: absolute;
+  font: 400 11px/1 var(--font-data);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: var(--mint);
+  text-shadow: 0 0 4px #000;
+}
+.w-cam-name {
+  left: calc(6% + 14px);
+  top: calc(9% + 12px);
+}
+.w-cam b.w-cam-left {
+  right: calc(6% + 14px);
+  top: calc(9% + 12px);
+  color: var(--amber);
+}
+/* what the keys now do: said under the crosshair for the first seconds of a flight, and then put away */
+.w-cam b.w-cam-keys {
+  left: 50%;
+  top: calc(50% + 74px);
+  transform: translateX(-50%);
+  color: var(--bone);
+  opacity: 0;
+}
+#hud.w-pilot .w-cam-keys {
+  animation: w-keys 7s ease-out;
+}
+@keyframes w-keys {
+  0%,
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* the gun is not in the hand: its counters are put away, and so is the uplink's own offer */
+#hud.w-pilot .ammo,
+#hud.w-pilot .w-link {
+  display: none;
+}
+
+/* ---------- the overspeed (overspeed-live.js): the line that offers it, and the bar while it runs ---------- */
+.w-offer {
+  position: absolute;
+  left: 50%;
+  top: calc(63% + 44px);
+  transform: translateX(-50%);
+  padding: 7px 14px 9px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--bone);
+  background: rgba(5, 8, 11, 0.72);
+  border: 1px solid var(--amber);
+}
+.w-offer[hidden],
+.w-over[hidden] {
+  display: none;
+}
+.w-offer i,
+.w-over i {
+  display: block;
+  height: 2px;
+  margin-top: 6px;
+  background: rgba(255, 180, 74, 0.2);
+}
+.w-offer u,
+.w-over u {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--amber);
+}
+.w-over {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--t) + 96px);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  width: min(460px, 60vw);
+  padding: 8px 12px 9px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--bone);
+  background: rgba(5, 8, 11, 0.72);
+  border: 1px solid var(--amber);
+  text-shadow: 0 0 4px #000;
+}
+.w-over b {
+  font-weight: 600;
+  color: var(--amber);
+}
+.w-over span {
+  text-align: right;
+  color: var(--amber);
+}
+.w-over i {
+  grid-column: 1 / -1;
+  height: 4px;
+}
+.w-over em {
+  grid-column: 1 / -1;
+  font-style: normal;
+}
+.w-over.weak {
+  border-color: var(--red);
+}
+.w-over.weak em {
+  color: var(--red);
+}
+.w-over.weak u {
+  background: var(--red);
+}
+/* on a phone the screen under the crosshair is the thumbs': the offer and the bar go up under the compass, smaller,
+   and the bar is two rows, not three */
+#hud.touch .w-offer {
+  top: calc(var(--t) + 78px);
+  padding: 5px 10px 6px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+#hud.touch .w-over {
+  top: calc(var(--t) + 78px);
+  grid-template-columns: auto 1fr auto;
+  width: min(340px, 86vw);
+  padding: 5px 10px 7px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+#hud.touch .w-over span {
+  grid-area: 1 / 2;
+  text-align: left;
+}
+#hud.touch .w-over em {
+  grid-area: 1 / 3;
+}
+#hud.touch .w-over i {
+  grid-area: 2 / 1 / 3 / -1;
+}
+/* held upright, the compass and what is to be done are a row lower, and there is room under them */
+@media (orientation: portrait) {
+  #hud.touch .w-offer,
+  #hud.touch .w-over {
+    top: calc(var(--t) + 150px);
+  }
+}
+
+/* ---------- WARDEN speaks (warden-live.js): its lines on the radio are its own colour ---------- */
+.radio p.w-warden b {
+  color: var(--red);
+}
+.radio p.w-warden span {
+  color: #ffd2cd;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- the menus ---------- */
+.w-kit {
+  margin: 0 0 var(--gap);
+  padding: 10px 12px 9px;
+  border: 1px solid rgba(255, 180, 74, 0.3);
+  border-left: 2px solid var(--amber);
+  background: rgba(255, 180, 74, 0.04);
+}
+.w-kit h3 {
+  margin: 0 0 7px;
+  font: 400 10px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  color: var(--amber);
+}
+.w-kit ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.w-kit li {
+  display: grid;
+  grid-template-columns: 1.6em 7.4em 1fr;
+  column-gap: 8px;
+  align-items: baseline;
+  font: 11px/19px var(--font-data);
+  white-space: nowrap;
+  color: var(--bone);
+}
+.w-kit kbd {
+  /* (a width, not a least width: the menus' own sheet sets every least width in them to nought) */
+  width: 1.6em;
+  font: inherit;
+  line-height: 15px;
+  text-align: center;
+  color: var(--ink);
+  background: var(--amber);
+}
+.w-kit kbd:empty {
+  visibility: hidden;
+}
+.w-kit b {
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+}
+.w-kit span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.w-kit p {
+  margin: 7px 0 0;
+  font: 10px/1.4 var(--font-data);
+  color: var(--mute);
+}
+.w-tally {
+  border-top: 1px solid var(--amber);
+}
+.w-tally::before {
+  content: 'FIELD NOTES';
+  padding: 8px 0 2px;
+  font: 10px/1 var(--font-data);
+  letter-spacing: 0.2em;
+  color: var(--amber);
+}
