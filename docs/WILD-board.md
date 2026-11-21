@@ -22,6 +22,10 @@ thing was worth — and a total, under a line that works out what follows:
 - **No callsign saved yet**: a field (`CALLSIGN`, 2–16 characters) and a POST button; nothing is sent until the
   player fills it in and presses POST (or Enter in the field). A bad callsign is refused in place, next to the
   field, with a plain reason. Under the field: a line saying the callsign and the score are shown to everyone.
+  Where there is no board to post to (a copy run from a folder, an app that carries the game with it) the
+  button says SAVE and the line says the callsign and the score are kept on this device: nothing leaves it.
+  At a desk the field is in focus as the screen opens; on a phone it is not, and is typed into when it is
+  tapped — a field in focus is what brings a phone's keyboard up, over half the debrief.
 - **A callsign already saved**: posted at once. The line reads POSTING… (after five seconds without an answer,
   POSTING… THE BOARD IS SLOW TO ANSWER), then POSTED AS \<NAME\> — #\<place\> OF THE TOP 100 (or — NOT IN THE TOP
   100), or, if the board could not be reached, THE BOARD COULD NOT BE REACHED — KEPT ON THIS DEVICE (the row is

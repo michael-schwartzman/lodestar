@@ -349,7 +349,12 @@ export function createBoardLive(ctx) {
     input.spellcheck = false;
     input.enterKeyHint = 'done';
     input.value = name;
-    stop(input);
+    // A screen that opens puts the focus on its first stop (menus.js), and here that is this field: right at a
+    // desk, where the keys are under the hands. On a phone a focused field is what brings the keyboard up,
+    // over half the debrief and unasked — a browser declines to for a focus nobody tapped; a page shown inside
+    // an app may not be so lucky. So on a phone it is not a stop: it is typed into when it is tapped.
+    if (G.touch) input.tabIndex = 0;
+    else stop(input);
     const why = el('p', 'w-board-why');
     const row = el('div');
     const submit = el('button', 'm-btn', submitLabel);
@@ -376,7 +381,12 @@ export function createBoardLive(ctx) {
       }
     });
     row.append(input, submit);
-    wrap.append(label, row, why, el('p', 'w-board-public', 'The callsign and the score are shown to everyone.'));
+    // (who will see it is said as it is: with nowhere to post to — a copy run from a folder, a page carried
+    // inside an app — nothing leaves the device, and the line does not say that it does)
+    const who = endpoint
+      ? 'The callsign and the score are shown to everyone.'
+      : 'The callsign and the score are kept on this device.';
+    wrap.append(label, row, why, el('p', 'w-board-public', who));
     return wrap;
   }
 
@@ -571,7 +581,7 @@ export function createBoardLive(ctx) {
     const postLine = el('p', 'w-board-post');
     if (!name) {
       const field = buildField({
-        submitLabel: 'POST',
+        submitLabel: endpoint ? 'POST' : 'SAVE',
         onSubmit(value) {
           setName(value);
           field.replaceWith(postLine);

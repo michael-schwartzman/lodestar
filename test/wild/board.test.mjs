@@ -354,6 +354,13 @@ test('with no callsign stored, nothing is sent until the field is filled and POS
     await endMission(page);
     await page.until('document.querySelector(".w-board-field input")', 'the callsign field to be offered');
     assert.equal(fake.state.creates.length, 0, 'nothing sent while there is no callsign yet');
+    // with a board to post to, the field says who will see it, and the button says what it does
+    assert.deepEqual(
+      await page.json(
+        `({ who: document.querySelector('.w-board-public').textContent, button: document.querySelector('.w-board-field button').textContent })`,
+      ),
+      { who: 'The callsign and the score are shown to everyone.', button: 'POST' },
+    );
 
     await page.evaluate('document.querySelector(".w-board-field input").focus(); void 0');
     for (const k of ['KeyM', 'KeyP', 'Digit1', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) await tap(page, k);
@@ -390,6 +397,48 @@ test('with no callsign stored, nothing is sent until the field is filled and POS
   } finally {
     await fake.stop();
   }
+});
+
+// Decision of 20 November 2026. A screen that opens puts the focus on its first stop (menus.js
+// focusFirstStop), and on the debrief that is this field. On a desk that is right: the keys are under the
+// player's hands. On a phone a focused field is what brings the keyboard up — over half the debrief, unasked.
+// A browser on a phone declines to do that for a focus nobody tapped; a page shown inside an app may not be so
+// lucky (one in a simulator was not). So on a phone the field is not a stop: it is typed into when it is tapped.
+test('on a desk the debrief opens with the callsign field in focus; on a phone the field waits to be tapped', async () => {
+  const field = (page) =>
+    page.json(
+      `(() => { const f = document.querySelector('.w-board-field input'); const a = document.activeElement; return { focused: a === f, stop: 'stop' in f.dataset, tabIndex: f.tabIndex, onAStop: !!a && 'stop' in a.dataset }; })()`,
+    );
+  const desk = await openClean(`${DESK}&autostart=1`);
+  await endMission(desk);
+  await desk.until('document.querySelector(".w-board-field input")', 'the callsign field to be offered');
+  assert.deepEqual(await field(desk), { focused: true, stop: true, tabIndex: 0, onAStop: true });
+  // (this page has no board to post to — as a copy run from a folder has none, or a page carried inside an
+  // app: what the field says of who will see the score is said as it is, and the button does not say POST)
+  const said = (page) =>
+    page.json(
+      `({ who: document.querySelector('.w-board-public').textContent, button: document.querySelector('.w-board-field button').textContent })`,
+    );
+  assert.deepEqual(await said(desk), { who: 'The callsign and the score are kept on this device.', button: 'SAVE' });
+  await desk.evaluate(
+    '(() => { const i = document.querySelector(".w-board-field input"); i.value = "WRAITH"; i.dispatchEvent(new Event("input")); document.querySelector(".w-board-field button").click(); })()',
+  );
+  await desk.until(
+    'document.querySelector(".w-board-post")?.textContent === "SCORES ARE KEPT ON THIS DEVICE"',
+    'the row to be kept',
+  );
+  assert.deepEqual(await desk.problems(), []);
+  await desk.close();
+
+  const phone = await openClean(`${DESK.replace('touch=0', 'touch=1')}&autostart=1`);
+  await endMission(phone);
+  await phone.until('document.querySelector(".w-board-field input")', 'the callsign field to be offered');
+  // the focus is on a stop, as on every screen — only not on this one; and the field can still be tapped
+  assert.deepEqual(await field(phone), { focused: false, stop: false, tabIndex: 0, onAStop: true });
+  await phone.evaluate('document.querySelector(".w-board-field input").focus(); void 0');
+  assert.equal((await field(phone)).focused, true, 'a tap still puts the focus in it');
+  assert.deepEqual(await phone.problems(), []);
+  await phone.close();
 });
 
 test('the server down: the row is kept on the device and queued; the server back: opening the board sends it once, and only once', async () => {

@@ -2,7 +2,8 @@
 
 A first-person infiltration game that runs in a browser tab — on a desk or on a phone.
 
-> **About this copy.** This is the game as one commit, published from the private repository it is made in. Its
+> **About this copy.** This is the game as it is published from the private repository it is made in, without
+> that repository's history. Its
 > documents were written there, and speak of things that are not here: that repository's branches, tags and
 > earlier commits, and scratch scripts in a folder (`.work/`) that is never kept. Everything that is here is
 > under the MIT licence: see "Licence and credits".
@@ -321,6 +322,11 @@ npm run fabric:status              # where it is
   uses it only when it is served from a `fabricapps.net` address; anywhere else the board is the browser's own.
 - The app only answers while its Fabric capacity is running. From a fresh clone, name the workspace the first
   time: `npm run fabric:deploy -- --yes --workspace-id <workspace id>`.
+
+## Privacy
+
+What the game does with information about the people who play it — in short, nothing leaves the device unless
+whoever hosts a copy has given it a scoreboard — is in [PRIVACY.md](PRIVACY.md).
 
 ## Licence and credits
 
